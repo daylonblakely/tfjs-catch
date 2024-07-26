@@ -25,7 +25,7 @@ const basketSlice = createSlice({
     },
     moveRight: (state) => {
       // prevent basket from going off screen
-      if (state.x + MOVE_DISTANCE > window.innerWidth - 100) {
+      if (state.x + MOVE_DISTANCE > window.innerWidth - 150) {
         return;
       }
       state.x += MOVE_DISTANCE;

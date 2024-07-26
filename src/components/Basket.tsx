@@ -11,8 +11,9 @@ const Basket = () => {
         position: 'absolute',
         y: window.innerHeight - 100,
         height: 15,
-        width: 100,
+        width: 150,
         backgroundColor: 'orange',
+        borderRadius: '7.5px',
       }}
       animate={{ x: x }}
       //   animate={{ y: window.innerHeight }}

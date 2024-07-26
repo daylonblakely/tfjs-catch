@@ -20,7 +20,7 @@ function App() {
         onClick={() =>
           dispatch(
             addBall({
-              x: 50 + Math.random() * (window.innerWidth - 50),
+              x: 100 + Math.random() * (window.innerWidth - 100),
               y: 0,
               isDone: false,
             })

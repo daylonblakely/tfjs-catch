@@ -22,7 +22,7 @@ const Ball = ({ ball, index }: { ball: BallType; index: number }) => {
 
   return (
     <motion.div
-      style={{ position: 'absolute', x: ball.x, y }}
+      style={{ position: 'absolute', x: ball.x, y, fontSize: '48px' }}
       animate={{ y: window.innerHeight }}
       transition={{ duration: 6 }}
     >
