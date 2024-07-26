@@ -1,27 +1,36 @@
 import React from 'react';
 import { useAppSelector, useAppDispatch } from './state/hooks';
 import { addBall } from './state/balls-slice';
+import Ball from './components/Ball';
 
 function App() {
-  const balls = useAppSelector((state) => state.balls.balls);
+  const balls = useAppSelector((state) => state.balls);
   const dispatch = useAppDispatch();
 
   return (
     <div>
       {balls.map((ball, index) => (
-        <div
-          key={index}
-          style={{ position: 'absolute', left: ball[0], top: ball[1] }}
-        >
-          🏀
-        </div>
+        <Ball key={index} ball={ball} index={index} />
       ))}
       <button
         onClick={() =>
-          dispatch(addBall([Math.random() * 400, Math.random() * 400]))
+          dispatch(
+            addBall({
+              x: 50 + Math.random() * (window.innerWidth - 50),
+              y: 0,
+              isDone: false,
+            })
+          )
         }
       >
         Add Ball
+      </button>
+      <button
+        onClick={() => {
+          console.log(balls);
+        }}
+      >
+        Print Balls
       </button>
     </div>
   );

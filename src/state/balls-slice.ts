@@ -1,34 +1,32 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type BallPosition = [number, number];
-
-interface BallState {
-  balls: BallPosition[];
+export interface Ball {
+  x: number;
+  y: number;
+  isDone: boolean;
 }
 
-const initialState: BallState = {
-  balls: [],
-};
+const initialState: Ball[] = [];
 
 const ballsSlice = createSlice({
   name: 'balls',
   initialState,
   reducers: {
-    addBall: (state, action: PayloadAction<BallPosition>) => {
-      state.balls.push(action.payload);
+    addBall: (state, action: PayloadAction<Ball>) => {
+      state.push(action.payload);
     },
-    //   increased: (state) => {
-    //     state.value += 1
-    //   },
-    //   decreased: (state) => {
-    //     state.value -= 1
-    //   },
-    //   increasedByAmount: (state, action: PayloadAction<number>) => {
-    //     state.value += action.payload
-    //   },
+    setBallY: (state, action: PayloadAction<{ index: number; y: number }>) => {
+      state[action.payload.index].y = action.payload.y;
+    },
+    setBallIsDone: (
+      state,
+      action: PayloadAction<{ index: number; isDone: boolean }>
+    ) => {
+      state[action.payload.index].isDone = action.payload.isDone;
+    },
   },
 });
 
-export const { addBall } = ballsSlice.actions;
+export const { addBall, setBallY, setBallIsDone } = ballsSlice.actions;
 
 export default ballsSlice.reducer;
