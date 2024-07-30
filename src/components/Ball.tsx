@@ -21,6 +21,10 @@ const Ball = ({ ball, index }: { ball: BallType; index: number }) => {
     });
   }, [dispatch, y, index]);
 
+  if (ball.isDone) {
+    return null;
+  }
+
   return (
     <motion.div
       style={{
