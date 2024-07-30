@@ -6,6 +6,7 @@ import {
   setBallY,
   setBallIsDone,
 } from '../state/balls-slice';
+import { HORIZONTAL_SECTIONS, HORIZONTAL_SPACING } from '../constants';
 
 const Ball = ({ ball, index }: { ball: BallType; index: number }) => {
   const dispatch = useAppDispatch();
@@ -22,7 +23,16 @@ const Ball = ({ ball, index }: { ball: BallType; index: number }) => {
 
   return (
     <motion.div
-      style={{ position: 'absolute', x: ball.x, y, fontSize: '48px' }}
+      style={{
+        position: 'absolute',
+        x:
+          (ball.x / HORIZONTAL_SECTIONS) *
+            (window.innerWidth - HORIZONTAL_SPACING * 2) +
+          HORIZONTAL_SPACING -
+          24,
+        y,
+        fontSize: '48px',
+      }}
       animate={{ y: window.innerHeight }}
       transition={{ duration: 6 }}
     >

@@ -1,6 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAppSelector } from '../state/hooks';
+import { HORIZONTAL_SECTIONS, HORIZONTAL_SPACING } from '../constants';
+
+const BASKET_WIDTH = 150;
+const BASKET_OFFSET = BASKET_WIDTH / 2;
 
 const Basket = () => {
   const { x, velocity } = useAppSelector((state) => state.basket);
@@ -11,11 +15,17 @@ const Basket = () => {
         position: 'absolute',
         y: window.innerHeight - 100,
         height: 15,
-        width: 150,
+        width: BASKET_WIDTH,
         backgroundColor: 'orange',
         borderRadius: '7.5px',
       }}
-      animate={{ x: x }}
+      animate={{
+        x:
+          (x / HORIZONTAL_SECTIONS) *
+            (window.innerWidth - HORIZONTAL_SPACING * 2) +
+          HORIZONTAL_SPACING -
+          BASKET_OFFSET,
+      }}
       //   animate={{ y: window.innerHeight }}
       //   transition={{ duration: 6 }}
       transition={{ type: 'spring', velocity }}

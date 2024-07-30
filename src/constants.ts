@@ -1,0 +1,7 @@
+export const MAX_BALLS = 10;
+export const HORIZONTAL_SECTIONS = 10;
+export const VERTICAL_SECTIONS = 10;
+export const HORIZONTAL_SPACING = 100;
+
+export const INPUT_SIZE =
+  HORIZONTAL_SECTIONS + MAX_BALLS * (HORIZONTAL_SECTIONS + 1);

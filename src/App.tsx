@@ -16,19 +16,7 @@ function App() {
         <Ball key={index} ball={ball} index={index} />
       ))}
       <Basket />
-      <button
-        onClick={() =>
-          dispatch(
-            addBall({
-              x: 100 + Math.random() * (window.innerWidth - 100),
-              y: 0,
-              isDone: false,
-            })
-          )
-        }
-      >
-        Add Ball
-      </button>
+      <button onClick={() => dispatch(addBall())}>Add Ball</button>
 
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>

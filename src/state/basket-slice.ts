@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { HORIZONTAL_SECTIONS } from '../constants';
 
 export interface Basket {
   x: number;
@@ -6,11 +7,9 @@ export interface Basket {
 }
 
 const initialState: Basket = {
-  x: 0,
+  x: Math.floor(HORIZONTAL_SECTIONS / 2),
   velocity: 10,
 };
-
-const MOVE_DISTANCE = 30;
 
 const basketSlice = createSlice({
   name: 'basket',
@@ -18,17 +17,19 @@ const basketSlice = createSlice({
   reducers: {
     moveLeft: (state) => {
       // prevent basket from going off screen
-      if (state.x - MOVE_DISTANCE < 0) {
+      if (state.x === 0) {
         return;
       }
-      state.x -= MOVE_DISTANCE;
+
+      state.x -= 1;
     },
     moveRight: (state) => {
       // prevent basket from going off screen
-      if (state.x + MOVE_DISTANCE > window.innerWidth - 150) {
+      if (state.x === HORIZONTAL_SECTIONS - 1) {
         return;
       }
-      state.x += MOVE_DISTANCE;
+
+      state.x += 1;
     },
   },
 });
