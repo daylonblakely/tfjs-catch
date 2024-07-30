@@ -38,7 +38,7 @@ const Ball = ({ ball, index }: { ball: BallType; index: number }) => {
         fontSize: '48px',
       }}
       animate={{ y: window.innerHeight }}
-      transition={{ duration: 6 }}
+      transition={{ duration: ball.duration }}
     >
       🏀
     </motion.div>

@@ -4,6 +4,7 @@ import { MAX_BALLS, HORIZONTAL_SECTIONS } from '../constants';
 export interface Ball {
   x: number;
   y: number;
+  duration: number;
   isDone: boolean;
 }
 
@@ -22,6 +23,7 @@ const ballsSlice = createSlice({
       state.push({
         x: Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1)),
         y: 0,
+        duration: Math.floor(Math.random() * 10) + 5,
         isDone: false,
       });
     },

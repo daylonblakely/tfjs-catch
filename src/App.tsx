@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from './state/hooks';
 import { addBall } from './state/balls-slice';
 import Ball from './components/Ball';
@@ -9,6 +9,14 @@ import { moveLeft, moveRight } from './state/basket-slice';
 function App() {
   const balls = useAppSelector((state) => state.balls);
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      dispatch(addBall());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [dispatch]);
 
   return (
     <div>
