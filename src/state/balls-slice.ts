@@ -1,5 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { MAX_BALLS, HORIZONTAL_SECTIONS } from '../constants';
+import {
+  MAX_BALLS,
+  HORIZONTAL_SECTIONS,
+  VERTICAL_SECTIONS,
+} from '../constants';
 
 export interface Ball {
   x: number;
@@ -28,7 +32,9 @@ const ballsSlice = createSlice({
       });
     },
     setBallY: (state, action: PayloadAction<{ index: number; y: number }>) => {
-      state[action.payload.index].y = action.payload.y;
+      state[action.payload.index].y = Math.floor(
+        (action.payload.y / window.innerHeight) * VERTICAL_SECTIONS
+      );
     },
     setBallIsDone: (
       state,

@@ -25,6 +25,7 @@ function App() {
       ))}
       <Basket />
       <button onClick={() => dispatch(addBall())}>Add Ball</button>
+      <button onClick={() => console.log(balls)}>print</button>
 
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>

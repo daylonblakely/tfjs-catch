@@ -1,7 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAppSelector } from '../state/hooks';
-import { HORIZONTAL_SECTIONS, HORIZONTAL_SPACING } from '../constants';
+import {
+  HORIZONTAL_SECTIONS,
+  HORIZONTAL_SPACING,
+  VERTICAL_SECTIONS,
+} from '../constants';
 
 const BASKET_WIDTH = 150;
 const BASKET_OFFSET = BASKET_WIDTH / 2;
@@ -13,7 +17,9 @@ const Basket = () => {
     <motion.div
       style={{
         position: 'absolute',
-        y: window.innerHeight - 100,
+        y:
+          ((VERTICAL_SECTIONS - 1) / VERTICAL_SECTIONS) * window.innerHeight -
+          24,
         height: 15,
         width: BASKET_WIDTH,
         backgroundColor: 'orange',
