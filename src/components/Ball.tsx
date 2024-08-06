@@ -6,7 +6,11 @@ import {
   setBallY,
   setBallIsDone,
 } from '../state/balls-slice';
-import { HORIZONTAL_SECTIONS, HORIZONTAL_SPACING } from '../constants';
+import {
+  HORIZONTAL_SECTIONS,
+  HORIZONTAL_SPACING,
+  // VERTICAL_SECTIONS,
+} from '../constants';
 
 const Ball = ({ ball, index }: { ball: BallType; index: number }) => {
   const dispatch = useAppDispatch();
@@ -20,6 +24,12 @@ const Ball = ({ ball, index }: { ball: BallType; index: number }) => {
       dispatch(setBallIsDone({ index: index, isDone: true }));
     });
   }, [dispatch, y, index]);
+
+  // useEffect(() => {
+  //   if (ball.y === VERTICAL_SECTIONS - 1) {
+  //     console.log('ball is in the basket');
+  //   }
+  // }, [ball.y]);
 
   if (ball.isDone) {
     return null;

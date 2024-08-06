@@ -17,9 +17,7 @@ const Basket = () => {
     <motion.div
       style={{
         position: 'absolute',
-        y:
-          ((VERTICAL_SECTIONS - 1) / VERTICAL_SECTIONS) * window.innerHeight -
-          24,
+        y: ((VERTICAL_SECTIONS - 1) / VERTICAL_SECTIONS) * window.innerHeight,
         height: 15,
         width: BASKET_WIDTH,
         backgroundColor: 'orange',

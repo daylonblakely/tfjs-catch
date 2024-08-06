@@ -8,7 +8,8 @@ import {
 } from '../constants';
 
 export const useEnvironmentState = () => {
-  const { balls, basket } = useAppSelector((state) => state);
+  const balls = useAppSelector((state) => state.balls);
+  const basket = useAppSelector((state) => state.basket);
 
   const getEnvironmentState = (): tf.Tensor2D => {
     const state = new Array(INPUT_SIZE).fill(0);

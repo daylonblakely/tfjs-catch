@@ -6,17 +6,20 @@ import Basket from './components/Basket';
 
 import { moveLeft, moveRight } from './state/basket-slice';
 import { useEnvironmentState } from './hooks/use-environment-state';
+import { useCalculateReward } from './hooks/use-calculate-reward';
+
 import { Game } from './Game';
 
 function App() {
   const balls = useAppSelector((state) => state.balls);
+
   const dispatch = useAppDispatch();
 
   const { getEnvironmentState } = useEnvironmentState();
+  const { calculateReward } = useCalculateReward();
 
-  const [game, _] = useState<Game>(
+  const [game] = useState<Game>(
     new Game({
-      getState: getEnvironmentState,
       // middle action is no-op
       actions: [
         () => dispatch(moveLeft()),
@@ -41,11 +44,15 @@ function App() {
       ))}
       <Basket />
       <button onClick={() => dispatch(addBall())}>Add Ball</button>
-      <button onClick={() => console.log(getEnvironmentState())}>print</button>
+      <button onClick={() => console.log(calculateReward())}>print</button>
 
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
-      <button onClick={() => game.play(false)}>Play</button>
+      <button
+        onClick={() => game.play(getEnvironmentState, calculateReward, false)}
+      >
+        Play
+      </button>
     </div>
   );
 }
