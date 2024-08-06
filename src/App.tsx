@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from './state/hooks';
 import { addBall } from './state/balls-slice';
 import Ball from './components/Ball';
@@ -6,12 +6,25 @@ import Basket from './components/Basket';
 
 import { moveLeft, moveRight } from './state/basket-slice';
 import { useEnvironmentState } from './hooks/use-environment-state';
+import { Game } from './Game';
 
 function App() {
   const balls = useAppSelector((state) => state.balls);
   const dispatch = useAppDispatch();
 
   const { getEnvironmentState } = useEnvironmentState();
+
+  const [game, _] = useState<Game>(
+    new Game({
+      getState: getEnvironmentState,
+      // middle action is no-op
+      actions: [
+        () => dispatch(moveLeft()),
+        () => {},
+        () => dispatch(moveRight()),
+      ],
+    })
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,6 +45,7 @@ function App() {
 
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
+      <button onClick={() => game.play(false)}>Play</button>
     </div>
   );
 }

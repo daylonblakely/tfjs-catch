@@ -7,7 +7,7 @@ import { INPUT_SIZE, NUMBER_OF_ACTIONS } from './constants';
 const MODEL_SAVE_PATH = 'indexeddb://tfjs-catch-v0';
 
 type NetworkParams = ({ model: Model } | { hiddenLayerSizes: number[] }) & {
-  numStates: number;
+  inputSize: number;
   numActions: number;
 };
 
@@ -25,7 +25,7 @@ export class Network {
       this.model = params.model;
     } else if ('hiddenLayerSizes' in params) {
       this.model = new Model(
-        params.numStates,
+        params.inputSize,
         params.numActions,
         params.hiddenLayerSizes
       );
@@ -56,7 +56,7 @@ export class Network {
   chooseAction(state: tf.Tensor, eps: number): number {
     // explore
     if (Math.random() < eps) {
-      return Math.floor(Math.random() * this.numActions) - 1;
+      return Math.floor(Math.random() * this.numActions);
     } else {
       // exploit
       return tf.tidy(() => {
@@ -67,7 +67,7 @@ export class Network {
         // normalize to sum to 1
         const probs = tf.div(sigmoid, tf.sum(sigmoid)) as tf.Tensor1D;
         // randomly sample from dist
-        return tf.multinomial(probs, 1).dataSync()[0] - 1;
+        return tf.multinomial(probs, 1).dataSync()[0];
       });
     }
   }
@@ -88,7 +88,7 @@ export class Network {
     const batch = this.memory.sample(this.batchSize);
     const states = batch.map(([state, , ,]) => state);
     const nextStates = batch.map(([, , , nextState]) =>
-      nextState ? nextState : tf.zeros([this.model.numStates])
+      nextState ? nextState : tf.zeros([this.model.inputSize])
     );
 
     // Predict the values of each action at each state
@@ -118,7 +118,7 @@ export class Network {
     qsad.forEach((state) => state.dispose());
 
     // Reshape the batches to be fed to the network
-    const xBatch = tf.tensor2d(x, [x.length, this.model.numStates]);
+    const xBatch = tf.tensor2d(x, [x.length, this.model.inputSize]);
     const yBatch = tf.tensor2d(y, [y.length, this.numActions]);
 
     // Learn the Q(s, a) values given associated discounted rewards
@@ -142,7 +142,7 @@ export class Network {
       console.log(`Loaded model from ${MODEL_SAVE_PATH}`);
       return new Network({
         model: model as Model,
-        numStates: INPUT_SIZE,
+        inputSize: INPUT_SIZE,
         numActions: NUMBER_OF_ACTIONS,
       });
     } else {

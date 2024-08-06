@@ -1,16 +1,16 @@
 import * as tf from '@tensorflow/tfjs';
 
 export class Model extends tf.Sequential {
-  numStates: number;
+  inputSize: number;
   private numActions: number;
 
   constructor(
-    numStates: number,
+    inputSize: number,
     numActions: number,
     hiddenLayerSizes: number[]
   ) {
     super();
-    this.numStates = numStates;
+    this.inputSize = inputSize;
     this.numActions = numActions;
 
     hiddenLayerSizes.forEach((hiddenLayerSize, i) => {
@@ -19,7 +19,7 @@ export class Model extends tf.Sequential {
           units: hiddenLayerSize,
           activation: 'relu',
           // `inputShape` is required only for the first layer.
-          inputShape: i === 0 ? [this.numStates] : undefined,
+          inputShape: i === 0 ? [this.inputSize] : undefined,
         })
       );
     });

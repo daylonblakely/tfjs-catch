@@ -1,3 +1,4 @@
+import * as tf from '@tensorflow/tfjs';
 import { useAppSelector } from '../state/hooks';
 
 import {
@@ -9,7 +10,7 @@ import {
 export const useEnvironmentState = () => {
   const { balls, basket } = useAppSelector((state) => state);
 
-  const getEnvironmentState = (): number[] => {
+  const getEnvironmentState = (): tf.Tensor2D => {
     const state = new Array(INPUT_SIZE).fill(0);
 
     //   set basket position
@@ -36,7 +37,8 @@ export const useEnvironmentState = () => {
       }
     });
 
-    return state;
+    return tf.tensor2d([state]);
+    // return state;
   };
 
   return { getEnvironmentState };
