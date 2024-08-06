@@ -5,10 +5,13 @@ import Ball from './components/Ball';
 import Basket from './components/Basket';
 
 import { moveLeft, moveRight } from './state/basket-slice';
+import { useEnvironmentState } from './hooks/use-environment-state';
 
 function App() {
   const balls = useAppSelector((state) => state.balls);
   const dispatch = useAppDispatch();
+
+  const { getEnvironmentState } = useEnvironmentState();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -25,7 +28,7 @@ function App() {
       ))}
       <Basket />
       <button onClick={() => dispatch(addBall())}>Add Ball</button>
-      <button onClick={() => console.log(balls)}>print</button>
+      <button onClick={() => console.log(getEnvironmentState())}>print</button>
 
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
