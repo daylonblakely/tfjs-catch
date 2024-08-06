@@ -49,7 +49,7 @@ function App() {
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
       <button
-        onClick={() => game.play(getEnvironmentState, calculateReward, false)}
+        onClick={() => game.learnToPlay(getEnvironmentState, calculateReward)}
       >
         Play
       </button>

@@ -7,7 +7,6 @@ export const useCalculateReward = () => {
 
   const calculateReward = () => {
     let reward = 0;
-    console.log(balls);
     balls.forEach((ball) => {
       if (!ball.isDone) {
         const ballPosition = ball.x;
