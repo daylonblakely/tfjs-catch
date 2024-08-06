@@ -11,7 +11,7 @@ import { useCalculateReward } from './hooks/use-calculate-reward';
 import { Game } from './Game';
 
 function App() {
-  const balls = useAppSelector((state) => state.balls);
+  const balls = useAppSelector((state) => state.balls.balls);
 
   const dispatch = useAppDispatch();
 
@@ -39,12 +39,13 @@ function App() {
 
   return (
     <div>
-      {balls.map((ball, index) => (
-        <Ball key={index} ball={ball} index={index} />
+      {Object.keys(balls).map((id, index) => (
+        <Ball key={id} ball={balls[id]} id={id} />
       ))}
       <Basket />
       <button onClick={() => dispatch(addBall())}>Add Ball</button>
       <button onClick={() => console.log(calculateReward())}>print</button>
+      <button onClick={() => console.log(balls)}>print</button>
 
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>

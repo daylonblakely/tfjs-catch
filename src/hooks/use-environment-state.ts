@@ -8,7 +8,7 @@ import {
 } from '../constants';
 
 export const useEnvironmentState = () => {
-  const balls = useAppSelector((state) => state.balls);
+  const balls = useAppSelector((state) => state.balls.balls);
   const basket = useAppSelector((state) => state.basket);
 
   const getEnvironmentState = (): tf.Tensor2D => {
@@ -19,23 +19,20 @@ export const useEnvironmentState = () => {
 
     //   set ball positions
     let ballIndex = 0;
-    balls.forEach((ball) => {
-      // skip if ball is done
-      if (!ball.isDone) {
-        const positionOffset =
-          HORIZONTAL_SECTIONS +
-          ballIndex * (HORIZONTAL_SECTIONS + VERTICAL_SECTIONS + 1);
+    Object.values(balls).forEach((ball) => {
+      const positionOffset =
+        HORIZONTAL_SECTIONS +
+        ballIndex * (HORIZONTAL_SECTIONS + VERTICAL_SECTIONS + 1);
 
-        //   set x position
-        state[positionOffset + ball.x] = 1;
-        //  set y position
-        state[positionOffset + HORIZONTAL_SECTIONS + ball.y] = 1;
-        //  set duration
-        state[positionOffset + HORIZONTAL_SECTIONS + VERTICAL_SECTIONS] =
-          ball.duration;
+      //   set x position
+      state[positionOffset + ball.x] = 1;
+      //  set y position
+      state[positionOffset + HORIZONTAL_SECTIONS + ball.y] = 1;
+      //  set duration
+      state[positionOffset + HORIZONTAL_SECTIONS + VERTICAL_SECTIONS] =
+        ball.duration;
 
-        ballIndex++;
-      }
+      ballIndex++;
     });
 
     return tf.tensor2d([state]);

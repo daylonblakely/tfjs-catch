@@ -45,23 +45,23 @@ export class Game {
       let state = getState();
       let done = false;
 
-      while (!done) {
-        const action = model.chooseAction(state, this.eps);
-        console.log('Action: ', action);
-        this.runAction(action);
-        const reward = getReward();
-        const nextState = getState();
+      //   while (!done) {
+      const action = model.chooseAction(state, this.eps);
+      console.log('Action: ', action);
+      this.runAction(action);
+      const reward = getReward();
+      const nextState = getState();
 
-        model.remember(state, action, reward, nextState);
+      model.remember(state, action, reward, nextState);
 
-        await model.train();
+      // await model.train();
 
-        state = nextState;
+      state = nextState;
 
-        // if (reward > 0) {
-        //   done = true;
-        // }
-      }
+      // if (reward > 0) {
+      //   done = true;
+      // }
+      //   }
 
       this.eps = Math.max(MIN_EPSILON, this.eps * Math.exp(-LAMBDA * episode));
       episode++;

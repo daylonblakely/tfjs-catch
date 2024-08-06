@@ -4,7 +4,7 @@ import { useAppDispatch } from '../state/hooks';
 import {
   Ball as BallType,
   setBallY,
-  setBallIsDone,
+  removeBallById,
 } from '../state/balls-slice';
 import {
   HORIZONTAL_SECTIONS,
@@ -12,18 +12,18 @@ import {
   // VERTICAL_SECTIONS,
 } from '../constants';
 
-const Ball = ({ ball, index }: { ball: BallType; index: number }) => {
+const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
   const dispatch = useAppDispatch();
   const y = useMotionValue(ball.y);
 
   useEffect(() => {
     y.on('change', (latest) => {
-      dispatch(setBallY({ index: index, y: latest }));
+      dispatch(setBallY({ id, y: latest }));
     });
     y.on('animationComplete', () => {
-      dispatch(setBallIsDone({ index: index, isDone: true }));
+      dispatch(removeBallById(id));
     });
-  }, [dispatch, y, index]);
+  }, [dispatch, y, id]);
 
   // useEffect(() => {
   //   if (ball.y === VERTICAL_SECTIONS - 1) {
@@ -31,7 +31,7 @@ const Ball = ({ ball, index }: { ball: BallType; index: number }) => {
   //   }
   // }, [ball.y]);
 
-  if (ball.isDone) {
+  if (!ball) {
     return null;
   }
 

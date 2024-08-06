@@ -9,10 +9,17 @@ export interface Ball {
   x: number;
   y: number;
   duration: number;
-  isDone: boolean;
 }
 
-const initialState: Ball[] = [];
+const initialState: {
+  count: number;
+  balls: {
+    [key: string]: Ball;
+  };
+} = {
+  count: 0,
+  balls: {},
+};
 
 const ballsSlice = createSlice({
   name: 'balls',
@@ -20,31 +27,29 @@ const ballsSlice = createSlice({
   reducers: {
     addBall: (state) => {
       // limit number of balls not done
-      if (state.filter((ball) => !ball.isDone).length >= MAX_BALLS) {
+      if (Object.keys(state.balls).length >= MAX_BALLS) {
         return;
       }
 
-      state.push({
+      state.balls[state.count] = {
         x: Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1)),
         y: 0,
         duration: Math.floor(Math.random() * 10) + 5,
-        isDone: false,
-      });
+      };
+
+      state.count++;
     },
-    setBallY: (state, action: PayloadAction<{ index: number; y: number }>) => {
-      state[action.payload.index].y = Math.floor(
+    setBallY: (state, action: PayloadAction<{ id: string; y: number }>) => {
+      state.balls[action.payload.id].y = Math.floor(
         (action.payload.y / window.innerHeight) * VERTICAL_SECTIONS
       );
     },
-    setBallIsDone: (
-      state,
-      action: PayloadAction<{ index: number; isDone: boolean }>
-    ) => {
-      state[action.payload.index].isDone = action.payload.isDone;
+    removeBallById: (state, action: PayloadAction<string>) => {
+      delete state.balls[action.payload];
     },
   },
 });
 
-export const { addBall, setBallY, setBallIsDone } = ballsSlice.actions;
+export const { addBall, setBallY, removeBallById } = ballsSlice.actions;
 
 export default ballsSlice.reducer;
