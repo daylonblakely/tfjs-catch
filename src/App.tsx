@@ -1,33 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from './state/hooks';
 import { addBall } from './state/balls-slice';
 import Ball from './components/Ball';
 import Basket from './components/Basket';
 
 import { moveLeft, moveRight } from './state/basket-slice';
-import { useEnvironmentState } from './hooks/use-environment-state';
-import { useCalculateReward } from './hooks/use-calculate-reward';
-
-import { Game } from './Game';
+import { useGame } from './hooks/use-game';
 
 function App() {
   const balls = useAppSelector((state) => state.balls.balls);
-
   const dispatch = useAppDispatch();
 
-  const { getEnvironmentState } = useEnvironmentState();
-  const { calculateReward } = useCalculateReward();
-
-  const [game] = useState<Game>(
-    new Game({
-      // middle action is no-op
-      actions: [
-        () => dispatch(moveLeft()),
-        () => {},
-        () => dispatch(moveRight()),
-      ],
-    })
-  );
+  const { learnToPlay } = useGame();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -39,21 +23,17 @@ function App() {
 
   return (
     <div>
-      {Object.keys(balls).map((id, index) => (
+      {Object.keys(balls).map((id) => (
         <Ball key={id} ball={balls[id]} id={id} />
       ))}
       <Basket />
       <button onClick={() => dispatch(addBall())}>Add Ball</button>
-      <button onClick={() => console.log(calculateReward())}>print</button>
       <button onClick={() => console.log(balls)}>print</button>
 
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
-      <button
-        onClick={() => game.learnToPlay(getEnvironmentState, calculateReward)}
-      >
-        Play
-      </button>
+
+      <button onClick={() => learnToPlay()}> Play </button>
     </div>
   );
 }
