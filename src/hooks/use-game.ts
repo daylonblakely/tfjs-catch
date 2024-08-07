@@ -19,6 +19,11 @@ const LAMBDA = 0.01;
 
 const NUM_EPISODES = 1000;
 
+// reward window for the basket
+const ballYRewardMin =
+  ((VERTICAL_SECTIONS - 1) / VERTICAL_SECTIONS) * window.innerHeight - 40;
+const ballYRewardMax = ballYRewardMin + 24;
+
 const getEnvironmentState = (
   basketPosition: number,
   balls: Ball[]
@@ -32,16 +37,14 @@ const getEnvironmentState = (
   let ballIndex = 0;
   balls.forEach((ball) => {
     const positionOffset =
-      HORIZONTAL_SECTIONS +
-      ballIndex * (HORIZONTAL_SECTIONS + VERTICAL_SECTIONS + 1);
+      HORIZONTAL_SECTIONS + ballIndex * (HORIZONTAL_SECTIONS + 1 + 1);
 
     //   set x position
     state[positionOffset + ball.x] = 1;
     //  set y position
-    state[positionOffset + HORIZONTAL_SECTIONS + ball.y] = 1;
+    state[positionOffset + HORIZONTAL_SECTIONS] = ball.y;
     //  set duration
-    state[positionOffset + HORIZONTAL_SECTIONS + VERTICAL_SECTIONS] =
-      ball.duration;
+    state[positionOffset + HORIZONTAL_SECTIONS + 1] = ball.duration;
 
     ballIndex++;
   });
@@ -51,10 +54,14 @@ const getEnvironmentState = (
 
 const calculateReward = (basketPosition: number, balls: Ball[]) => {
   let reward = 0;
+
   balls.forEach((ball) => {
     const ballPosition = ball.x;
-    // TODO this might need to check the distance
-    if (ball.y === VERTICAL_SECTIONS - 1 && ballPosition === basketPosition) {
+    if (
+      ball.y >= ballYRewardMin &&
+      ball.y <= ballYRewardMax &&
+      ballPosition === basketPosition
+    ) {
       reward += 1;
     }
   });

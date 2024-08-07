@@ -1,9 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {
-  MAX_BALLS,
-  HORIZONTAL_SECTIONS,
-  VERTICAL_SECTIONS,
-} from '../constants';
+import { MAX_BALLS, HORIZONTAL_SECTIONS } from '../constants';
 
 export interface Ball {
   x: number;
@@ -40,9 +36,9 @@ const ballsSlice = createSlice({
       state.count++;
     },
     setBallY: (state, action: PayloadAction<{ id: string; y: number }>) => {
-      state.balls[action.payload.id].y = Math.floor(
-        (action.payload.y / window.innerHeight) * VERTICAL_SECTIONS
-      );
+      if (!state.balls[action.payload.id]) return;
+
+      state.balls[action.payload.id].y = action.payload.y;
     },
     removeBallById: (state, action: PayloadAction<string>) => {
       delete state.balls[action.payload];

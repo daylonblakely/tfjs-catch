@@ -6,11 +6,7 @@ import {
   setBallY,
   removeBallById,
 } from '../state/balls-slice';
-import {
-  HORIZONTAL_SECTIONS,
-  HORIZONTAL_SPACING,
-  // VERTICAL_SECTIONS,
-} from '../constants';
+import { HORIZONTAL_SECTIONS, HORIZONTAL_SPACING } from '../constants';
 
 const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
   const dispatch = useAppDispatch();
@@ -24,12 +20,6 @@ const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
       dispatch(removeBallById(id));
     });
   }, [dispatch, y, id]);
-
-  // useEffect(() => {
-  //   if (ball.y === VERTICAL_SECTIONS - 1) {
-  //     console.log('ball is in the basket');
-  //   }
-  // }, [ball.y]);
 
   if (!ball) {
     return null;
