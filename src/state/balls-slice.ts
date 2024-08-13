@@ -2,10 +2,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { MAX_BALLS, HORIZONTAL_SECTIONS } from '../constants';
 
 export interface Ball {
+  id: string;
   x: number;
   y: number;
   duration: number;
-  scored: boolean;
+  hitRim: boolean;
+  missed: boolean;
+  wentIn: boolean;
 }
 
 const initialState: {
@@ -29,10 +32,13 @@ const ballsSlice = createSlice({
       }
 
       state.balls[state.count] = {
+        id: state.count.toString(),
         x: Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1)),
         y: 0,
         duration: Math.floor(Math.random() * 10) + 5,
-        scored: false,
+        hitRim: false,
+        missed: false,
+        wentIn: false,
       };
 
       state.count++;
@@ -45,13 +51,25 @@ const ballsSlice = createSlice({
     removeBallById: (state, action: PayloadAction<string>) => {
       delete state.balls[action.payload];
     },
-    setBallScored: (state, action: PayloadAction<string>) => {
-      state.balls[action.payload].scored = true;
+    setBallHitRim: (state, action: PayloadAction<string>) => {
+      state.balls[action.payload].hitRim = true;
+    },
+    setBallWentIn: (state, action: PayloadAction<string>) => {
+      state.balls[action.payload].wentIn = true;
+    },
+    setBallMissed: (state, action: PayloadAction<string>) => {
+      state.balls[action.payload].missed = true;
     },
   },
 });
 
-export const { addBall, setBallY, removeBallById, setBallScored } =
-  ballsSlice.actions;
+export const {
+  addBall,
+  setBallY,
+  removeBallById,
+  setBallHitRim,
+  setBallWentIn,
+  setBallMissed,
+} = ballsSlice.actions;
 
 export default ballsSlice.reducer;

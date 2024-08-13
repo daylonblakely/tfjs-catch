@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { motion, useMotionValue } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '../state/hooks';
 import {
   Ball as BallType,
   setBallY,
   removeBallById,
-  setBallScored,
+  setBallHitRim,
+  setBallWentIn,
+  setBallMissed,
 } from '../state/balls-slice';
 import {
   HORIZONTAL_SECTIONS,
@@ -17,31 +19,34 @@ const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
   const basket = useAppSelector((state) => state.basket);
   const dispatch = useAppDispatch();
   const y = useMotionValue(ball.y);
-  const [hitRim, setHitRim] = useState(false);
 
   useEffect(() => {
     const checkIfBallHitRim = () => {
       if (
-        !hitRim &&
+        !ball.hitRim &&
+        !ball.missed &&
         ball.x === basket.x &&
         y.get() >= BASKET_Y - 60 &&
         y.get() <= BASKET_Y - 55
       ) {
-        setHitRim(true);
+        dispatch(setBallHitRim(id));
         console.log('hit rim');
       }
     };
 
-    const checkIfBallScored = () => {
-      if (
-        hitRim &&
-        !ball.scored &&
-        ball.x === basket.x &&
-        y.get() >= BASKET_Y &&
-        y.get() <= BASKET_Y + 5
-      ) {
-        dispatch(setBallScored(id));
-        console.log('score');
+    const checkIfWentIn = () => {
+      if (y.get() >= BASKET_Y && y.get() <= BASKET_Y + 5) {
+        if (
+          ball.hitRim &&
+          !ball.missed &&
+          !ball.wentIn &&
+          ball.x === basket.x
+        ) {
+          dispatch(setBallWentIn(id));
+          console.log('score');
+        } else {
+          dispatch(setBallMissed(id));
+        }
       }
     };
 
@@ -49,7 +54,7 @@ const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
       dispatch(setBallY({ id, y: y.get() }));
 
       checkIfBallHitRim();
-      checkIfBallScored();
+      checkIfWentIn();
     });
 
     const unsubscribeComplete = y.on('animationComplete', () => {
@@ -60,7 +65,16 @@ const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
       unsubscribeChange();
       unsubscribeComplete();
     };
-  }, [dispatch, y, id, hitRim, ball.x, basket.x, ball.scored]);
+  }, [
+    dispatch,
+    y,
+    id,
+    ball.hitRim,
+    ball.wentIn,
+    ball.missed,
+    basket.x,
+    ball.x,
+  ]);
 
   if (!ball) {
     return null;

@@ -3,7 +3,7 @@ import * as tf from '@tensorflow/tfjs';
 import { useAppSelector, useAppDispatch } from '../state/hooks';
 
 import { moveLeft, moveRight } from '../state/basket-slice';
-import { Ball } from '../state/balls-slice';
+import { Ball, addBall } from '../state/balls-slice';
 
 import { Network } from '../Network';
 
@@ -14,6 +14,8 @@ const MAX_EPSILON = 0.2;
 const LAMBDA = 0.01;
 
 const NUM_EPISODES = 1000;
+
+type BallTracker = { [key in string]: boolean };
 
 const getEnvironmentState = (
   basketPosition: number,
@@ -43,12 +45,22 @@ const getEnvironmentState = (
   return tf.tensor2d([state]);
 };
 
-const calculateReward = (balls: Ball[]) => {
+const calculateReward = (
+  balls: Ball[],
+  ballsThatHitRim: BallTracker,
+  ballsWentIn: BallTracker
+) => {
   let reward = 0;
 
   balls.forEach((ball) => {
-    if (ball.scored) {
+    if (ball.hitRim && ball.missed && !ballsThatHitRim[ball.id]) {
       reward += 1;
+      ballsThatHitRim[ball.id] = true;
+    }
+
+    if (ball.wentIn && !ballsWentIn[ball.id]) {
+      reward += 100;
+      ballsWentIn[ball.id] = true;
     }
   });
   return reward;
@@ -88,12 +100,21 @@ export const useGame = () => {
   const runGames = async (numGames: number) => {
     for (let game = 0; game < numGames; game++) {
       await new Promise<void>((resolve) => {
+        console.log('------- NEW GAME ---------');
+        const ballsThatHitRim: BallTracker = {};
+        const ballsWentIn: BallTracker = {};
+
+        const interval = setInterval(() => {
+          dispatch(addBall());
+        }, 1000);
+
         const runEpisode = async (model: Network, eps: number) => {
           let episode = 0;
 
           const runSingleEpisode = async () => {
             if (episode >= NUM_EPISODES) {
               await model.train();
+              clearInterval(interval);
               resolve();
               return;
             }
@@ -105,7 +126,11 @@ export const useGame = () => {
 
             const action = model.chooseAction(state, eps);
             actions[action]();
-            const reward = calculateReward(Object.values(ballsRef.current));
+            const reward = calculateReward(
+              Object.values(ballsRef.current),
+              ballsThatHitRim,
+              ballsWentIn
+            );
             console.log('Reward: ', reward);
             const nextState = getEnvironmentState(
               basketRef.current.x,

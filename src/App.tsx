@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from './state/hooks';
 import { addBall } from './state/balls-slice';
 import Ball from './components/Ball';
@@ -14,14 +13,6 @@ function App() {
   const dispatch = useAppDispatch();
 
   const { runGames } = useGame();
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      dispatch(addBall());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [dispatch]);
 
   return (
     <div>

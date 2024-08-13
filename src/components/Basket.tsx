@@ -8,7 +8,7 @@ import {
   BASKET_HEIGHT,
 } from '../constants';
 
-const BASKET_WIDTH = 150;
+const BASKET_WIDTH = 100;
 const BASKET_OFFSET = BASKET_WIDTH / 2;
 
 const Basket = () => {
