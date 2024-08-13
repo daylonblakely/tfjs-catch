@@ -17,6 +17,7 @@ const MIN_EPSILON = 0.01;
 const MAX_EPSILON = 0.2;
 const LAMBDA = 0.01;
 
+const NUM_GAMES = 100;
 const NUM_EPISODES = 1000;
 
 // reward window for the basket
@@ -52,16 +53,11 @@ const getEnvironmentState = (
   return tf.tensor2d([state]);
 };
 
-const calculateReward = (basketPosition: number, balls: Ball[]) => {
+const calculateReward = (balls: Ball[]) => {
   let reward = 0;
 
   balls.forEach((ball) => {
-    const ballPosition = ball.x;
-    if (
-      ball.y >= ballYRewardMin &&
-      ball.y <= ballYRewardMax &&
-      ballPosition === basketPosition
-    ) {
+    if (ball.scored) {
       reward += 1;
     }
   });
@@ -106,6 +102,7 @@ export const useGame = () => {
 
     const runEpisode = async (model: Network) => {
       if (episode >= NUM_EPISODES) {
+        await model.train();
         return;
       }
 
@@ -117,10 +114,7 @@ export const useGame = () => {
       const action = model.chooseAction(state, eps);
       actions[action]();
       //   setTimeout(() => {
-      const reward = calculateReward(
-        basketRef.current.x,
-        Object.values(ballsRef.current)
-      );
+      const reward = calculateReward(Object.values(ballsRef.current));
       console.log('Reward: ', reward);
       const nextState = getEnvironmentState(
         basketRef.current.x,
@@ -147,7 +141,6 @@ export const useGame = () => {
 
     // Start the first episode
     requestAnimationFrame(() => runEpisode(modelRef.current as Network));
-    await modelRef.current.train();
   };
 
   return { learnToPlay };

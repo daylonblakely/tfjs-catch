@@ -23,6 +23,17 @@ function App() {
 
   return (
     <div>
+      <div
+        style={{
+          position: 'absolute',
+          background: 'red',
+          // top: ((10 - 1) / 10) * window.innerHeight,
+          transform: `translateY(${((10 - 1) / 10) * window.innerHeight}px)`,
+
+          height: 1,
+          width: window.innerWidth,
+        }}
+      ></div>
       {Object.keys(balls).map((id) => (
         <Ball key={id} ball={balls[id]} id={id} />
       ))}

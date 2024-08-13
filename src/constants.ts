@@ -18,3 +18,8 @@ export const NUMBER_OF_ACTIONS = 3;
 
 export const INPUT_SIZE =
   HORIZONTAL_SECTIONS + MAX_BALLS * (HORIZONTAL_SECTIONS + 1 + 1);
+
+export const BASKET_Y =
+  ((VERTICAL_SECTIONS - 1) / VERTICAL_SECTIONS) * window.innerHeight;
+
+export const BASKET_HEIGHT = 15;

@@ -4,7 +4,8 @@ import { useAppSelector } from '../state/hooks';
 import {
   HORIZONTAL_SECTIONS,
   HORIZONTAL_SPACING,
-  VERTICAL_SECTIONS,
+  BASKET_Y,
+  BASKET_HEIGHT,
 } from '../constants';
 
 const BASKET_WIDTH = 150;
@@ -17,8 +18,8 @@ const Basket = () => {
     <motion.div
       style={{
         position: 'absolute',
-        y: ((VERTICAL_SECTIONS - 1) / VERTICAL_SECTIONS) * window.innerHeight,
-        height: 15,
+        y: BASKET_Y,
+        height: BASKET_HEIGHT,
         width: BASKET_WIDTH,
         backgroundColor: 'orange',
         borderRadius: '7.5px',

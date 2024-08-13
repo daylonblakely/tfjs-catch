@@ -1,25 +1,66 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, useMotionValue } from 'framer-motion';
-import { useAppDispatch } from '../state/hooks';
+import { useAppDispatch, useAppSelector } from '../state/hooks';
 import {
   Ball as BallType,
   setBallY,
   removeBallById,
+  setBallScored,
 } from '../state/balls-slice';
-import { HORIZONTAL_SECTIONS, HORIZONTAL_SPACING } from '../constants';
+import {
+  HORIZONTAL_SECTIONS,
+  HORIZONTAL_SPACING,
+  BASKET_Y,
+} from '../constants';
 
 const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
+  const basket = useAppSelector((state) => state.basket);
   const dispatch = useAppDispatch();
   const y = useMotionValue(ball.y);
+  const [hitRim, setHitRim] = useState(false);
 
   useEffect(() => {
-    y.on('change', (latest) => {
-      dispatch(setBallY({ id, y: latest }));
+    const checkIfBallHitRim = () => {
+      if (
+        !hitRim &&
+        ball.x === basket.x &&
+        y.get() >= BASKET_Y - 60 &&
+        y.get() <= BASKET_Y - 55
+      ) {
+        setHitRim(true);
+        console.log('hit rim');
+      }
+    };
+
+    const checkIfBallScored = () => {
+      if (
+        hitRim &&
+        !ball.scored &&
+        ball.x === basket.x &&
+        y.get() >= BASKET_Y &&
+        y.get() <= BASKET_Y + 5
+      ) {
+        dispatch(setBallScored(id));
+        console.log('score');
+      }
+    };
+
+    const unsubscribeChange = y.on('change', () => {
+      dispatch(setBallY({ id, y: y.get() }));
+
+      checkIfBallHitRim();
+      checkIfBallScored();
     });
-    y.on('animationComplete', () => {
+
+    const unsubscribeComplete = y.on('animationComplete', () => {
       dispatch(removeBallById(id));
     });
-  }, [dispatch, y, id]);
+
+    return () => {
+      unsubscribeChange();
+      unsubscribeComplete();
+    };
+  }, [dispatch, y, id, hitRim, ball.x, basket.x, ball.scored]);
 
   if (!ball) {
     return null;
