@@ -7,11 +7,13 @@ import Basket from './components/Basket';
 import { moveLeft, moveRight } from './state/basket-slice';
 import { useGame } from './hooks/use-game';
 
+const NUM_GAMES = 100;
+
 function App() {
   const balls = useAppSelector((state) => state.balls.balls);
   const dispatch = useAppDispatch();
 
-  const { learnToPlay } = useGame();
+  const { runGames } = useGame();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -44,7 +46,7 @@ function App() {
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
 
-      <button onClick={() => learnToPlay()}> Play </button>
+      <button onClick={() => runGames(NUM_GAMES)}> Play </button>
     </div>
   );
 }

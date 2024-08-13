@@ -7,23 +7,13 @@ import { Ball } from '../state/balls-slice';
 
 import { Network } from '../Network';
 
-import {
-  INPUT_SIZE,
-  HORIZONTAL_SECTIONS,
-  VERTICAL_SECTIONS,
-} from '../constants';
+import { INPUT_SIZE, HORIZONTAL_SECTIONS } from '../constants';
 
 const MIN_EPSILON = 0.01;
 const MAX_EPSILON = 0.2;
 const LAMBDA = 0.01;
 
-const NUM_GAMES = 100;
 const NUM_EPISODES = 1000;
-
-// reward window for the basket
-const ballYRewardMin =
-  ((VERTICAL_SECTIONS - 1) / VERTICAL_SECTIONS) * window.innerHeight - 40;
-const ballYRewardMax = ballYRewardMin + 24;
 
 const getEnvironmentState = (
   basketPosition: number,
@@ -95,53 +85,48 @@ export const useGame = () => {
     });
   }
 
-  const learnToPlay = async (eps: number = MAX_EPSILON) => {
-    if (!modelRef.current) return;
+  const runGames = async (numGames: number) => {
+    for (let game = 0; game < numGames; game++) {
+      await new Promise<void>((resolve) => {
+        const runEpisode = async (model: Network, eps: number) => {
+          let episode = 0;
 
-    let episode = 0;
+          const runSingleEpisode = async () => {
+            if (episode >= NUM_EPISODES) {
+              await model.train();
+              resolve();
+              return;
+            }
 
-    const runEpisode = async (model: Network) => {
-      if (episode >= NUM_EPISODES) {
-        await model.train();
-        return;
-      }
+            let state = getEnvironmentState(
+              basketRef.current.x,
+              Object.values(ballsRef.current)
+            );
 
-      let state = getEnvironmentState(
-        basketRef.current.x,
-        Object.values(ballsRef.current)
-      );
+            const action = model.chooseAction(state, eps);
+            actions[action]();
+            const reward = calculateReward(Object.values(ballsRef.current));
+            console.log('Reward: ', reward);
+            const nextState = getEnvironmentState(
+              basketRef.current.x,
+              Object.values(ballsRef.current)
+            );
 
-      const action = model.chooseAction(state, eps);
-      actions[action]();
-      //   setTimeout(() => {
-      const reward = calculateReward(Object.values(ballsRef.current));
-      console.log('Reward: ', reward);
-      const nextState = getEnvironmentState(
-        basketRef.current.x,
-        Object.values(ballsRef.current)
-      );
+            model.remember(state, action, reward, nextState);
 
-      model.remember(state, action, reward, nextState);
+            eps = Math.max(MIN_EPSILON, eps * Math.exp(-LAMBDA * episode));
+            episode++;
 
-      // await model.train();
+            requestAnimationFrame(runSingleEpisode);
+          };
 
-      //   state = nextState;
+          requestAnimationFrame(runSingleEpisode);
+        };
 
-      // if (reward > 0) {
-      //   done = true;
-      // }
-
-      eps = Math.max(MIN_EPSILON, eps * Math.exp(-LAMBDA * episode));
-      episode++;
-
-      // Use requestAnimationFrame to ensure the UI remains responsive
-      requestAnimationFrame(() => runEpisode(model));
-      //   }, 1000);
-    };
-
-    // Start the first episode
-    requestAnimationFrame(() => runEpisode(modelRef.current as Network));
+        runEpisode(modelRef.current as Network, MAX_EPSILON);
+      });
+    }
   };
 
-  return { learnToPlay };
+  return { runGames };
 };
