@@ -151,6 +151,9 @@ export const useGame = () => {
         runEpisode(modelRef.current as Network, MAX_EPSILON);
       });
     }
+
+    await modelRef.current?.saveModel();
+    console.log('Training done');
   };
 
   return { runGames };
