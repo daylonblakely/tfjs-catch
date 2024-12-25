@@ -21,6 +21,7 @@ export const useScoreTracker = () => {
   const dispatch = useAppDispatch();
 
   //  every 100 milliseconds check if balls hit rim, went in, or missed
+  let lastRimHitX = useRef(-1);
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
@@ -36,6 +37,7 @@ export const useScoreTracker = () => {
         // check if ball hit rim
         const hitRim = nextRimHit.x === basket.x;
         if (hitRim) {
+          lastRimHitX.current = nextRimHit.x;
           dispatch(setBallHitRim(nextRimHit.id));
         } else {
           dispatch(setBallMissed(nextRimHit.id));
@@ -54,7 +56,9 @@ export const useScoreTracker = () => {
       ) {
         nextThroughRim = throughRimQueue[throughRimIndex];
         // check if ball went in
-        const wentIn = nextThroughRim.x === basket.x;
+        const wentIn =
+          nextThroughRim.x === basket.x &&
+          nextThroughRim.x === lastRimHitX.current;
         if (wentIn) {
           dispatch(setBallWentIn(nextThroughRim.id));
         } else {
@@ -64,7 +68,7 @@ export const useScoreTracker = () => {
         dispatch(shiftThroughRimQueue());
         throughRimIndex++;
       }
-    }, 100);
+    }, 50);
 
     return () => clearInterval(interval);
   }, [rimHitQueue, basket.x, dispatch, throughRimQueue]);

@@ -56,7 +56,7 @@ const ballsSlice = createSlice({
       const fallSpeed = Math.random() * 0.5 + 0.5;
       // ball at rim height at now time plus duration in seconds
       const rimHeightAt = Date.now() + MIN_BALL_SPEED * fallSpeed * 1000;
-      const throughRimAt = rimHeightAt + 1000;
+      const throughRimAt = rimHeightAt + 500;
 
       state.balls[state.count] = {
         id,
