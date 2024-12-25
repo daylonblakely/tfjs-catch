@@ -130,7 +130,8 @@ export class Network {
 
   // save the model
   async saveModel() {
-    return await this.model.save(MODEL_SAVE_PATH);
+    const now = new Date();
+    return await this.model.save(MODEL_SAVE_PATH + now.toISOString());
   }
 
   // load the model

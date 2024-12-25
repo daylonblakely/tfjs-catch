@@ -3,7 +3,7 @@ import * as tf from '@tensorflow/tfjs';
 import { useAppSelector, useAppDispatch } from '../state/hooks';
 
 import { moveLeft, moveRight } from '../state/basket-slice';
-import { Ball, addBall } from '../state/balls-slice';
+import { Ball, addBall, resetBallState } from '../state/balls-slice';
 
 import { Network } from '../Network';
 
@@ -29,19 +29,25 @@ const getEnvironmentState = (
   //   set ball positions
   let ballIndex = 0;
   balls.forEach((ball) => {
+    if (!ball.isActive) return;
+
     const positionOffset =
-      HORIZONTAL_SECTIONS + ballIndex * (HORIZONTAL_SECTIONS + 1 + 1);
+      HORIZONTAL_SECTIONS + ballIndex * (HORIZONTAL_SECTIONS + 1);
+    // HORIZONTAL_SECTIONS + ballIndex * (HORIZONTAL_SECTIONS + 1 + 1);
 
     //   set x position
     state[positionOffset + ball.x] = 1;
     //  set y position
-    state[positionOffset + HORIZONTAL_SECTIONS] = ball.y;
+    // state[positionOffset + HORIZONTAL_SECTIONS] = ball.y;
     //  set duration
-    state[positionOffset + HORIZONTAL_SECTIONS + 1] = ball.duration;
+    // state[positionOffset + HORIZONTAL_SECTIONS + 1] = ball.duration;
+    // set fall speed
+    state[positionOffset + HORIZONTAL_SECTIONS] = ball.fallSpeed;
 
     ballIndex++;
   });
 
+  // console.log('State: ', state);
   return tf.tensor2d([state]);
 };
 
@@ -101,6 +107,10 @@ export const useGame = () => {
     for (let game = 0; game < numGames; game++) {
       await new Promise<void>((resolve) => {
         console.log('------- NEW GAME ---------');
+        // delay one second before starting new game
+        setTimeout(() => {
+          dispatch(resetBallState());
+        }, 1000);
         const ballsThatHitRim: BallTracker = {};
         const ballsWentIn: BallTracker = {};
 

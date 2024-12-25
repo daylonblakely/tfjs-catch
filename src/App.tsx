@@ -4,14 +4,17 @@ import Ball from './components/Ball';
 import Basket from './components/Basket';
 
 import { moveLeft, moveRight } from './state/basket-slice';
+import { useScoreTracker } from './hooks/use-score-tracker';
 import { useGame } from './hooks/use-game';
+
+import { BASKET_Y } from './constants';
 
 const NUM_GAMES = 100;
 
 function App() {
   const balls = useAppSelector((state) => state.balls.balls);
   const dispatch = useAppDispatch();
-
+  useScoreTracker();
   const { runGames } = useGame();
 
   return (
@@ -21,7 +24,7 @@ function App() {
           position: 'absolute',
           background: 'red',
           // top: ((10 - 1) / 10) * window.innerHeight,
-          transform: `translateY(${((10 - 1) / 10) * window.innerHeight}px)`,
+          transform: `translateY(${BASKET_Y}px)`,
 
           height: 1,
           width: window.innerWidth,

@@ -32,7 +32,7 @@ const Basket = () => {
           BASKET_OFFSET,
       }}
       //   animate={{ y: window.innerHeight }}
-      //   transition={{ duration: 6 }}
+      // transition={{ duration: 6 }}
       transition={{ type: 'spring', velocity }}
     ></motion.div>
   );

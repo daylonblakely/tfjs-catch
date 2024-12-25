@@ -13,6 +13,7 @@ import {
   HORIZONTAL_SECTIONS,
   HORIZONTAL_SPACING,
   BASKET_Y,
+  MIN_BALL_SPEED,
 } from '../constants';
 
 const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
@@ -25,9 +26,10 @@ const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
       if (
         !ball.hitRim &&
         !ball.missed &&
-        ball.x === basket.x &&
-        y.get() >= BASKET_Y - 60 &&
-        y.get() <= BASKET_Y - 55
+        ball.x === basket.x
+        // &&
+        // y.get() >= BASKET_Y - 60 &&
+        // y.get() <= BASKET_Y - 55
       ) {
         dispatch(setBallHitRim(id));
         console.log('hit rim');
@@ -51,14 +53,14 @@ const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
     };
 
     const unsubscribeChange = y.on('change', () => {
-      dispatch(setBallY({ id, y: y.get() }));
-
-      checkIfBallHitRim();
-      checkIfWentIn();
+      // dispatch(setBallY({ id, y: y.get() }));
+      // checkIfBallHitRim();
+      // checkIfWentIn();
     });
 
     const unsubscribeComplete = y.on('animationComplete', () => {
-      dispatch(removeBallById(id));
+      // dispatch(removeBallById(id));
+      // checkIfBallHitRim();
     });
 
     return () => {
@@ -92,8 +94,8 @@ const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
         y,
         fontSize: '48px',
       }}
-      animate={{ y: window.innerHeight }}
-      transition={{ duration: ball.duration }}
+      animate={{ y: BASKET_Y - 60 }}
+      transition={{ duration: MIN_BALL_SPEED * ball.fallSpeed }}
     >
       🏀
     </motion.div>
