@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { HORIZONTAL_SECTIONS, MIN_BALL_SPEED } from '../constants';
+import { HORIZONTAL_SECTIONS, MAX_BALLS, MIN_BALL_SPEED } from '../constants';
 
 export interface Ball {
   id: string;
@@ -30,6 +30,9 @@ const ballsSlice = createSlice({
   initialState,
   reducers: {
     addBall: (state) => {
+      // check if max balls reached
+      if (state.count >= MAX_BALLS) return;
+
       const id = state.count.toString();
       const x = Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1));
       const fallSpeed = Math.random() * 0.5 + 0.5;
@@ -69,6 +72,7 @@ const ballsSlice = createSlice({
     },
     removeBallById: (state, action: PayloadAction<string>) => {
       delete state.balls[action.payload];
+      state.count--;
     },
     setBallHitRim: (state, action: PayloadAction<string>) => {
       console.log('hit rim');

@@ -7,6 +7,7 @@ import {
   setBallWentIn,
   updateAllBallY,
   addBall,
+  removeBallById,
 } from '../state/balls-slice';
 import { BASKET_Y } from '../constants';
 
@@ -50,15 +51,24 @@ export const useGameLoop = () => {
         }
       };
 
+      // one second after ball set to inactive, remove it from state
+      const removeBall = (ball: Ball) => {
+        setTimeout(() => {
+          dispatch(removeBallById(ball.id));
+        }, 1000);
+      };
+
       //   update y for all balls
       dispatch(updateAllBallY());
 
       for (const ballId in balls) {
         const ball = balls[ballId];
-        if (!ball.isActive) continue;
-
-        checkIfBallHitRim(ball);
-        checkIfBallWentIn(ball);
+        if (!ball.isActive) {
+          removeBall(ball);
+        } else {
+          checkIfBallHitRim(ball);
+          checkIfBallWentIn(ball);
+        }
       }
     }, 50);
 
