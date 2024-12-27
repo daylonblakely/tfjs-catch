@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { motion, useMotionValue } from 'framer-motion';
-import { Ball as BallType } from '../state/balls-slice';
+import { motion } from 'framer-motion';
+import { useAppSelector } from '../state/hooks';
 import {
   HORIZONTAL_SECTIONS,
   HORIZONTAL_SPACING,
   BASKET_Y,
-  MIN_BALL_SPEED,
 } from '../constants';
 
-const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
-  const y = useMotionValue(ball.y);
-  const x = useMotionValue(
-    (ball.x / HORIZONTAL_SECTIONS) *
-      (window.innerWidth - HORIZONTAL_SPACING * 2) +
-      HORIZONTAL_SPACING -
-      24
+const Ball = React.memo(({ id }: { id: string }) => {
+  const ball = useAppSelector(
+    (state) => state.balls.balls[id],
+    (prev, next) => {
+      return prev.x === next.x && prev.y === next.y;
+    }
   );
   const [secondaryAnimation, setSecondaryAnimation] = useState(false);
   const [animationProps, setAnimationProps] = useState({});
@@ -35,24 +33,8 @@ const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
         opacity: 0,
       });
       setSecondaryAnimation(true);
-    } else if (ball.missed) {
-      setAnimationProps({
-        y: window.innerHeight,
-      });
-      setSecondaryAnimation(true);
     }
-
-    const unsubscribeChange = y.on('change', () => {});
-
-    const unsubscribeComplete = y.on('animationComplete', () => {
-      // dispatch(removeBallById(id));
-    });
-
-    return () => {
-      unsubscribeChange();
-      unsubscribeComplete();
-    };
-  }, [y, ball.hitRim, ball.wentIn, ball.missed]);
+  }, [ball.hitRim, ball.missed, ball.wentIn]);
 
   if (!ball) {
     return null;
@@ -62,33 +44,29 @@ const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
     <motion.div
       style={{
         position: 'absolute',
-        x,
-        y,
+        x:
+          (ball.x / HORIZONTAL_SECTIONS) *
+            (window.innerWidth - HORIZONTAL_SPACING * 2) +
+          HORIZONTAL_SPACING -
+          24,
         fontSize: '48px',
       }}
-      animate={secondaryAnimation ? animationProps : { y: window.innerHeight }}
-      // animate={secondaryAnimation ? animationProps : { y: BASKET_Y - 60 }}
+      initial={{ y: -100 }}
+      animate={secondaryAnimation ? animationProps : { y: ball.y }}
       transition={{
-        duration: MIN_BALL_SPEED * ball.fallSpeed,
-        // duration:
-        //   (window.innerHeight * MIN_BALL_SPEED * ball.fallSpeed) /
-        //   ((9 / 10) * window.innerHeight - 60),
-        // duration:
-        //   secondaryAnimation && !ball.missed
-        //     ? 0.5
-        //     : (MIN_BALL_SPEED + 0.5) * ball.fallSpeed,
-        // type: 'tween',
-        ease: 'linear',
+        type: 'spring',
+        damping: 20,
+        stiffness: 100,
       }}
       onAnimationComplete={() => {
-        if (secondaryAnimation) {
-          // Perform any additional actions after the secondary animation completes
-        }
+        // if (secondaryAnimation) {
+        //   // Perform any additional actions after the secondary animation completes
+        // }
       }}
     >
       🏀
     </motion.div>
   );
-};
+});
 
 export default Ball;

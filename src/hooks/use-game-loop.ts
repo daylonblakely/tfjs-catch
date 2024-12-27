@@ -5,14 +5,12 @@ import {
   setBallHitRim,
   setBallMissed,
   setBallWentIn,
-  shiftRimHitQueue,
-  shiftThroughRimQueue,
+  updateAllBallY,
+  addBall,
 } from '../state/balls-slice';
+import { BASKET_Y } from '../constants';
 
-// watch for balls that hit rim
-// watch for balls that went in
-// watch for balls that missed
-export const useScoreTracker = () => {
+export const useGameLoop = () => {
   const balls = useAppSelector((state) => state.balls.balls);
   const basket = useAppSelector((state) => state.basket);
   const dispatch = useAppDispatch();
@@ -21,12 +19,10 @@ export const useScoreTracker = () => {
   let lastRimHitX = useRef(-1);
   useEffect(() => {
     const interval = setInterval(() => {
-      const now = Date.now();
-
       const checkIfBallHitRim = (ball: Ball) => {
         if (ball.hitRim || ball.missed) return;
 
-        const rimHeight = ball.rimHeightAt <= now;
+        const rimHeight = ball.y >= BASKET_Y - 60 && ball.y <= BASKET_Y;
 
         if (!rimHeight) return;
 
@@ -39,12 +35,12 @@ export const useScoreTracker = () => {
       const checkIfBallWentIn = (ball: Ball) => {
         if (ball.wentIn || ball.missed) return;
 
-        const throughRim = ball.throughRimAt <= now;
+        const throughRim = ball.y >= BASKET_Y;
 
         if (!throughRim) return;
 
         if (
-          !!ball.hitRim &&
+          ball.hitRim &&
           ball.x === basket.x &&
           ball.x === lastRimHitX.current
         ) {
@@ -53,6 +49,9 @@ export const useScoreTracker = () => {
           dispatch(setBallMissed(ball.id));
         }
       };
+
+      //   update y for all balls
+      dispatch(updateAllBallY());
 
       for (const ballId in balls) {
         const ball = balls[ballId];
@@ -65,6 +64,14 @@ export const useScoreTracker = () => {
 
     return () => clearInterval(interval);
   }, [balls, basket.x, dispatch]);
+
+  //   add balls to state every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      dispatch(addBall());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [dispatch]);
 
   return null;
 };

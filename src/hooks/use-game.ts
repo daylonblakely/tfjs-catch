@@ -119,16 +119,16 @@ export const useGame = () => {
         const ballsThatHitRim: BallTracker = {};
         const ballsWentIn: BallTracker = {};
 
-        const interval = setInterval(() => {
-          // add new ball if there are less than max balls
-          const countActiveBalls = Object.values(ballsRef.current).filter(
-            (ball) => ball.isActive
-          ).length;
-          if (countActiveBalls >= gameSettings.maxBalls) {
-            return;
-          }
-          dispatch(addBall());
-        }, 1000);
+        // const interval = setInterval(() => {
+        //   // add new ball if there are less than max balls
+        //   const countActiveBalls = Object.values(ballsRef.current).filter(
+        //     (ball) => ball.isActive
+        //   ).length;
+        //   if (countActiveBalls >= gameSettings.maxBalls) {
+        //     return;
+        //   }
+        //   dispatch(addBall());
+        // }, 1000);
 
         const runEpisode = async (model: Network, eps: number) => {
           let episode = 0;
@@ -136,7 +136,7 @@ export const useGame = () => {
           const runSingleEpisode = async () => {
             if (episode >= gameSettings.numEpisodes) {
               await model.train();
-              clearInterval(interval);
+              // clearInterval(interval);
               resolve();
               return;
             }
