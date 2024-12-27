@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { MAX_BALLS, HORIZONTAL_SECTIONS, MIN_BALL_SPEED } from '../constants';
+import { HORIZONTAL_SECTIONS, MIN_BALL_SPEED } from '../constants';
 
 export interface Ball {
   id: string;
@@ -40,17 +40,6 @@ const ballsSlice = createSlice({
   initialState,
   reducers: {
     addBall: (state) => {
-      // limit number of active balls not done
-      // if (Object.keys(state.balls).length >= MAX_BALLS) {
-      //   return;
-      // }
-      const countActiveBalls = Object.values(state.balls).filter(
-        (ball) => ball.isActive
-      ).length;
-      if (countActiveBalls >= MAX_BALLS) {
-        return;
-      }
-
       const id = state.count.toString();
       const x = Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1));
       const fallSpeed = Math.random() * 0.5 + 0.5;

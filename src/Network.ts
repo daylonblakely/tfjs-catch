@@ -1,7 +1,6 @@
 import * as tf from '@tensorflow/tfjs';
 import { Model } from './Model';
 import { ReplayMemory } from './ReplayMemory';
-import { INPUT_SIZE, NUMBER_OF_ACTIONS } from './constants';
 
 // The IndexedDB path where the model of the policy network will be saved.
 const MODEL_SAVE_PATH = 'indexeddb://tfjs-catch-v0';
@@ -135,7 +134,7 @@ export class Network {
   }
 
   // load the model
-  static async loadModel() {
+  static async loadModel(inputSize: number, numActions: number) {
     const modelsInfo = await tf.io.listModels();
     if (MODEL_SAVE_PATH in modelsInfo) {
       console.log(`Loading existing model...`);
@@ -143,8 +142,8 @@ export class Network {
       console.log(`Loaded model from ${MODEL_SAVE_PATH}`);
       return new Network({
         model: model as Model,
-        inputSize: INPUT_SIZE,
-        numActions: NUMBER_OF_ACTIONS,
+        inputSize,
+        numActions,
       });
     } else {
       throw new Error(`Cannot find model at ${MODEL_SAVE_PATH}.`);

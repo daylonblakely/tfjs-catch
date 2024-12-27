@@ -7,21 +7,16 @@ import { Ball, addBall, resetBallState } from '../state/balls-slice';
 
 import { Network } from '../Network';
 
-import { INPUT_SIZE, HORIZONTAL_SECTIONS } from '../constants';
-
-const MIN_EPSILON = 0.01;
-const MAX_EPSILON = 0.2;
-const LAMBDA = 0.01;
-
-const NUM_EPISODES = 1000;
+import { HORIZONTAL_SECTIONS } from '../constants';
 
 type BallTracker = { [key in string]: boolean };
 
 const getEnvironmentState = (
   basketPosition: number,
-  balls: Ball[]
+  balls: Ball[],
+  inputSize: number
 ): tf.Tensor2D => {
-  const state = new Array(INPUT_SIZE).fill(0);
+  const state = new Array(inputSize).fill(0);
 
   //   set basket position
   state[basketPosition] = 1;
@@ -70,6 +65,7 @@ const calculateReward = (
 export const useGame = () => {
   const balls = useAppSelector((state) => state.balls.balls);
   const basket = useAppSelector((state) => state.basket);
+  const gameSettings = useAppSelector((state) => state.gameSettings);
   const dispatch = useAppDispatch();
 
   const modelRef = useRef<Network | null>(null);
@@ -90,10 +86,24 @@ export const useGame = () => {
     () => dispatch(moveRight()),
   ];
 
+  // state looks like
+  /*
+      [
+      0, 0, 1, 0, // basket position
+      0, 1, 0, 0, // ball 1 x position
+      .5,         // ball 1 fall speed
+      1, 0, 0, 0, // ball 2 x position
+      .7,         // ball 2 fall speed
+      ]
+    */
+
+  const inputSize =
+    HORIZONTAL_SECTIONS + gameSettings.maxBalls * (HORIZONTAL_SECTIONS + 1);
+
   if (!modelRef.current) {
     modelRef.current = new Network({
       hiddenLayerSizes: [128, 128],
-      inputSize: INPUT_SIZE,
+      inputSize,
       numActions: 3,
     });
   }
@@ -110,6 +120,13 @@ export const useGame = () => {
         const ballsWentIn: BallTracker = {};
 
         const interval = setInterval(() => {
+          // add new ball if there are less than max balls
+          const countActiveBalls = Object.values(ballsRef.current).filter(
+            (ball) => ball.isActive
+          ).length;
+          if (countActiveBalls >= gameSettings.maxBalls) {
+            return;
+          }
           dispatch(addBall());
         }, 1000);
 
@@ -117,7 +134,7 @@ export const useGame = () => {
           let episode = 0;
 
           const runSingleEpisode = async () => {
-            if (episode >= NUM_EPISODES) {
+            if (episode >= gameSettings.numEpisodes) {
               await model.train();
               clearInterval(interval);
               resolve();
@@ -126,7 +143,8 @@ export const useGame = () => {
 
             let state = getEnvironmentState(
               basketRef.current.x,
-              Object.values(ballsRef.current)
+              Object.values(ballsRef.current),
+              inputSize
             );
 
             const action = model.chooseAction(state, eps);
@@ -139,12 +157,16 @@ export const useGame = () => {
             console.log('Reward: ', reward);
             const nextState = getEnvironmentState(
               basketRef.current.x,
-              Object.values(ballsRef.current)
+              Object.values(ballsRef.current),
+              inputSize
             );
 
             model.remember(state, action, reward, nextState);
 
-            eps = Math.max(MIN_EPSILON, eps * Math.exp(-LAMBDA * episode));
+            eps = Math.max(
+              gameSettings.minEpsilon,
+              eps * Math.exp(-gameSettings.lambda * episode)
+            );
             episode++;
 
             requestAnimationFrame(runSingleEpisode);
@@ -153,7 +175,7 @@ export const useGame = () => {
           requestAnimationFrame(runSingleEpisode);
         };
 
-        runEpisode(modelRef.current as Network, MAX_EPSILON);
+        runEpisode(modelRef.current as Network, gameSettings.maxEpsilon);
       });
     }
 
