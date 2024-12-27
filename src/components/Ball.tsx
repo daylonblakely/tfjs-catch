@@ -1,14 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, useMotionValue } from 'framer-motion';
-import { useAppDispatch, useAppSelector } from '../state/hooks';
-import {
-  Ball as BallType,
-  setBallY,
-  removeBallById,
-  setBallHitRim,
-  setBallWentIn,
-  setBallMissed,
-} from '../state/balls-slice';
+import { Ball as BallType } from '../state/balls-slice';
 import {
   HORIZONTAL_SECTIONS,
   HORIZONTAL_SPACING,
@@ -17,41 +9,9 @@ import {
 } from '../constants';
 
 const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
-  const basket = useAppSelector((state) => state.basket);
-  const dispatch = useAppDispatch();
   const y = useMotionValue(ball.y);
 
   useEffect(() => {
-    const checkIfBallHitRim = () => {
-      if (
-        !ball.hitRim &&
-        !ball.missed &&
-        ball.x === basket.x
-        // &&
-        // y.get() >= BASKET_Y - 60 &&
-        // y.get() <= BASKET_Y - 55
-      ) {
-        dispatch(setBallHitRim(id));
-        console.log('hit rim');
-      }
-    };
-
-    const checkIfWentIn = () => {
-      if (y.get() >= BASKET_Y && y.get() <= BASKET_Y + 5) {
-        if (
-          ball.hitRim &&
-          !ball.missed &&
-          !ball.wentIn &&
-          ball.x === basket.x
-        ) {
-          dispatch(setBallWentIn(id));
-          console.log('score');
-        } else {
-          dispatch(setBallMissed(id));
-        }
-      }
-    };
-
     const unsubscribeChange = y.on('change', () => {
       // dispatch(setBallY({ id, y: y.get() }));
       // checkIfBallHitRim();
@@ -67,16 +27,7 @@ const Ball = ({ id, ball }: { id: string; ball: BallType }) => {
       unsubscribeChange();
       unsubscribeComplete();
     };
-  }, [
-    dispatch,
-    y,
-    id,
-    ball.hitRim,
-    ball.wentIn,
-    ball.missed,
-    basket.x,
-    ball.x,
-  ]);
+  }, [y]);
 
   if (!ball) {
     return null;

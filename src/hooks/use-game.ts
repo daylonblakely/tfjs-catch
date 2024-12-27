@@ -33,14 +33,9 @@ const getEnvironmentState = (
 
     const positionOffset =
       HORIZONTAL_SECTIONS + ballIndex * (HORIZONTAL_SECTIONS + 1);
-    // HORIZONTAL_SECTIONS + ballIndex * (HORIZONTAL_SECTIONS + 1 + 1);
 
     //   set x position
     state[positionOffset + ball.x] = 1;
-    //  set y position
-    // state[positionOffset + HORIZONTAL_SECTIONS] = ball.y;
-    //  set duration
-    // state[positionOffset + HORIZONTAL_SECTIONS + 1] = ball.duration;
     // set fall speed
     state[positionOffset + HORIZONTAL_SECTIONS] = ball.fallSpeed;
 
