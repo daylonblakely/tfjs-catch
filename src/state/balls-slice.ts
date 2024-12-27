@@ -44,7 +44,14 @@ const ballsSlice = createSlice({
       const x = Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1));
       const fallSpeed = Math.random() * 0.5 + 0.5;
       // ball at rim height at now time plus duration in seconds
-      const rimHeightAt = Date.now() + MIN_BALL_SPEED * fallSpeed * 1000;
+      const rimHeightAt =
+        Date.now() +
+        (MIN_BALL_SPEED *
+          fallSpeed *
+          1000 *
+          ((9 / 10) * window.innerHeight - 60)) /
+          window.innerHeight;
+      // const rimHeightAt = Date.now() + MIN_BALL_SPEED * fallSpeed * 1000;
       const throughRimAt = rimHeightAt + 500;
 
       state.balls[state.count] = {
@@ -84,14 +91,8 @@ const ballsSlice = createSlice({
       state.balls[action.payload].hitRim = true;
     },
     setBallWentIn: (state, action: PayloadAction<string>) => {
-      // if ball hit rim, it can't go in
-      if (state.balls[action.payload].hitRim) {
-        console.log('make');
-        state.balls[action.payload].wentIn = true;
-      } else {
-        console.log('miss');
-        state.balls[action.payload].missed = true;
-      }
+      console.log('make');
+      state.balls[action.payload].wentIn = true;
 
       state.balls[action.payload].isActive = false;
     },

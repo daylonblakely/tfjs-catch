@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../state/hooks';
 import {
+  Ball,
   setBallHitRim,
   setBallMissed,
   setBallWentIn,
@@ -12,10 +13,7 @@ import {
 // watch for balls that went in
 // watch for balls that missed
 export const useScoreTracker = () => {
-  const rimHitQueue = useAppSelector((state) => state.balls.rimHitQueue);
-  const throughRimQueue = useAppSelector(
-    (state) => state.balls.throughRimQueue
-  );
+  const balls = useAppSelector((state) => state.balls.balls);
   const basket = useAppSelector((state) => state.basket);
   const dispatch = useAppDispatch();
 
@@ -25,53 +23,48 @@ export const useScoreTracker = () => {
     const interval = setInterval(() => {
       const now = Date.now();
 
-      const checkRimHits = () => {
-        let rimHitIndex = 0;
-        while (
-          rimHitQueue[rimHitIndex] &&
-          rimHitQueue[rimHitIndex].timeInMillis <= now
-        ) {
-          const nextRimHit = rimHitQueue[rimHitIndex];
-          const hitRim = nextRimHit.x === basket.x;
+      const checkIfBallHitRim = (ball: Ball) => {
+        if (ball.hitRim || ball.missed) return;
 
-          if (hitRim) {
-            lastRimHitX.current = nextRimHit.x;
-            dispatch(setBallHitRim(nextRimHit.id));
-          }
+        const rimHeight = ball.rimHeightAt <= now;
 
-          dispatch(shiftRimHitQueue());
-          rimHitIndex++;
+        if (!rimHeight) return;
+
+        if (ball.x === basket.x) {
+          lastRimHitX.current = ball.x;
+          dispatch(setBallHitRim(ball.id));
         }
       };
 
-      const checkThroughRim = () => {
-        let throughRimIndex = 0;
-        while (
-          throughRimQueue[throughRimIndex] &&
-          throughRimQueue[throughRimIndex].timeInMillis <= now
+      const checkIfBallWentIn = (ball: Ball) => {
+        if (ball.wentIn || ball.missed) return;
+
+        const throughRim = ball.throughRimAt <= now;
+
+        if (!throughRim) return;
+
+        if (
+          !!ball.hitRim &&
+          ball.x === basket.x &&
+          ball.x === lastRimHitX.current
         ) {
-          const nextThroughRim = throughRimQueue[throughRimIndex];
-          const wentIn =
-            nextThroughRim.x === basket.x &&
-            nextThroughRim.x === lastRimHitX.current;
-
-          if (wentIn) {
-            dispatch(setBallWentIn(nextThroughRim.id));
-          } else {
-            dispatch(setBallMissed(nextThroughRim.id));
-          }
-
-          dispatch(shiftThroughRimQueue());
-          throughRimIndex++;
+          dispatch(setBallWentIn(ball.id));
+        } else {
+          dispatch(setBallMissed(ball.id));
         }
       };
 
-      checkRimHits();
-      checkThroughRim();
+      for (const ballId in balls) {
+        const ball = balls[ballId];
+        if (!ball.isActive) continue;
+
+        checkIfBallHitRim(ball);
+        checkIfBallWentIn(ball);
+      }
     }, 50);
 
     return () => clearInterval(interval);
-  }, [rimHitQueue, throughRimQueue, basket.x, dispatch]);
+  }, [balls, basket.x, dispatch]);
 
   return null;
 };
