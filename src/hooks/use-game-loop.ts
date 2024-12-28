@@ -16,49 +16,46 @@ export const useGameLoop = () => {
   const basket = useAppSelector((state) => state.basket);
   const dispatch = useAppDispatch();
 
-  //  every X milliseconds check if balls hit rim, went in, or missed
-  let lastRimHitX = useRef(-1);
+  const lastRimHitX = useRef(-1);
+  const movedSinceLastRimHit = useRef(false);
+  const animationFrameId = useRef<number | null>(null);
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      const checkIfBallHitRim = (ball: Ball) => {
-        if (ball.hitRim || ball.missed) return;
+    movedSinceLastRimHit.current = basket.x !== lastRimHitX.current;
 
-        const rimHeight = ball.y >= BASKET_Y - 60 && ball.y <= BASKET_Y;
+    const checkIfBallHitRim = (ball: Ball) => {
+      if (ball.hitRim || ball.missed) return;
 
-        if (!rimHeight) return;
+      const rimHeight = ball.y >= BASKET_Y - 60 && ball.y <= BASKET_Y;
 
-        if (ball.x === basket.x) {
-          lastRimHitX.current = ball.x;
-          dispatch(setBallHitRim(ball.id));
-        }
-      };
+      if (rimHeight && ball.x === basket.x) {
+        lastRimHitX.current = ball.x;
+        dispatch(setBallHitRim(ball.id));
+      }
+    };
 
-      const checkIfBallWentIn = (ball: Ball) => {
-        if (ball.wentIn || ball.missed) return;
+    const checkIfBallWentIn = (ball: Ball) => {
+      if (ball.wentIn || ball.missed) return;
 
-        const throughRim = ball.y >= BASKET_Y;
+      const throughRim = ball.y >= BASKET_Y;
 
-        if (!throughRim) return;
+      if (!throughRim) return;
 
-        if (
-          ball.hitRim &&
-          ball.x === basket.x &&
-          ball.x === lastRimHitX.current
-        ) {
-          dispatch(setBallWentIn(ball.id));
-        } else {
-          dispatch(setBallMissed(ball.id));
-        }
-      };
+      if (ball.hitRim && ball.x === basket.x && !movedSinceLastRimHit.current) {
+        dispatch(setBallWentIn(ball.id));
+      } else {
+        dispatch(setBallMissed(ball.id));
+      }
+    };
 
-      // one second after ball set to inactive, remove it from state
-      const removeBall = (ball: Ball) => {
-        setTimeout(() => {
-          dispatch(removeBallById(ball.id));
-        }, 1000);
-      };
+    const removeBall = (ball: Ball) => {
+      setTimeout(() => {
+        dispatch(removeBallById(ball.id));
+      }, 1000);
+    };
 
-      //   update y for all balls
+    const update = () => {
+      // Update y for all balls
       dispatch(updateAllBallY());
 
       for (const ballId in balls) {
@@ -70,12 +67,20 @@ export const useGameLoop = () => {
           checkIfBallWentIn(ball);
         }
       }
-    }, 50);
 
-    return () => clearInterval(interval);
+      animationFrameId.current = requestAnimationFrame(update);
+    };
+
+    animationFrameId.current = requestAnimationFrame(update);
+
+    return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
+    };
   }, [balls, basket.x, dispatch]);
 
-  //   add balls to state every second
+  // Add balls to state every second
   useEffect(() => {
     const interval = setInterval(() => {
       dispatch(addBall());

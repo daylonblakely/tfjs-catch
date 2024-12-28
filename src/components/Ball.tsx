@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 import { useAppSelector } from '../state/hooks';
 import {
   HORIZONTAL_SECTIONS,
@@ -16,6 +16,13 @@ const Ball = React.memo(({ id }: { id: string }) => {
   );
   const [secondaryAnimation, setSecondaryAnimation] = useState(false);
   const [animationProps, setAnimationProps] = useState({});
+  const y = useMotionValue(ball.y);
+  const x = useMotionValue(
+    (ball.x / HORIZONTAL_SECTIONS) *
+      (window.innerWidth - HORIZONTAL_SPACING * 2) +
+      HORIZONTAL_SPACING -
+      24
+  );
 
   useEffect(() => {
     if (ball.wentIn) {
@@ -44,14 +51,11 @@ const Ball = React.memo(({ id }: { id: string }) => {
     <motion.div
       style={{
         position: 'absolute',
-        x:
-          (ball.x / HORIZONTAL_SECTIONS) *
-            (window.innerWidth - HORIZONTAL_SPACING * 2) +
-          HORIZONTAL_SPACING -
-          24,
+        x,
+        y,
         fontSize: '48px',
       }}
-      initial={{ y: -100 }}
+      initial={{ y: ball.y }}
       animate={secondaryAnimation ? animationProps : { y: ball.y }}
       transition={{
         type: 'spring',
@@ -59,9 +63,9 @@ const Ball = React.memo(({ id }: { id: string }) => {
         stiffness: 100,
       }}
       onAnimationComplete={() => {
-        // if (secondaryAnimation) {
-        //   // Perform any additional actions after the secondary animation completes
-        // }
+        if (secondaryAnimation) {
+          // Perform any additional actions after the secondary animation completes
+        }
       }}
     >
       🏀

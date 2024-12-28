@@ -14,11 +14,13 @@ export interface Ball {
 
 const initialState: {
   count: number;
+  numActiveBalls: number;
   balls: {
     [key: string]: Ball;
   };
 } = {
   count: 0,
+  numActiveBalls: 0,
   balls: {},
 };
 
@@ -28,18 +30,16 @@ const ballsSlice = createSlice({
   reducers: {
     addBall: (state) => {
       // check if max balls reached
-      if (state.count >= MAX_BALLS) return;
+      if (state.numActiveBalls >= MAX_BALLS) return;
 
       const id = state.count.toString();
       const x = Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1));
       const fallSpeed = Math.random() * 0.5 + 0.5;
 
-      state.balls[state.count] = {
+      state.balls[id] = {
         id,
         x,
         y: -100,
-        // duration: Math.floor(Math.random() * 10) + 5,
-        // random number between .5 and 1
         fallSpeed,
         hitRim: false,
         missed: false,
@@ -48,6 +48,7 @@ const ballsSlice = createSlice({
       };
 
       state.count++;
+      state.numActiveBalls++;
     },
     setBallY: (state, action: PayloadAction<{ id: string; y: number }>) => {
       if (!state.balls[action.payload.id]) return;
@@ -56,7 +57,6 @@ const ballsSlice = createSlice({
     },
     removeBallById: (state, action: PayloadAction<string>) => {
       delete state.balls[action.payload];
-      state.count--;
     },
     setBallHitRim: (state, action: PayloadAction<string>) => {
       console.log('hit rim');
@@ -67,11 +67,13 @@ const ballsSlice = createSlice({
       state.balls[action.payload].wentIn = true;
 
       state.balls[action.payload].isActive = false;
+      state.numActiveBalls--;
     },
     setBallMissed: (state, action: PayloadAction<string>) => {
       console.log('miss');
       state.balls[action.payload].missed = true;
       state.balls[action.payload].isActive = false;
+      state.numActiveBalls--;
     },
     resetBallState: (state) => {
       // state = { ...initialState };
@@ -83,7 +85,7 @@ const ballsSlice = createSlice({
         const ball = state.balls[ballId];
 
         // set ball y position based on current position and fall speed
-        const y = ball.y + 5;
+        const y = ball.y + 2;
         state.balls[ballId].y = y;
       }
     },
