@@ -1,14 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { HORIZONTAL_SECTIONS, MAX_BALLS, MIN_BALL_SPEED } from '../constants';
+import { HORIZONTAL_SECTIONS, MAX_BALLS } from '../constants';
 
 export interface Ball {
   id: string;
   x: number;
   y: number;
-  // duration: number;
   fallSpeed: number;
-  rimHeightAt: number;
-  throughRimAt: number;
   hitRim: boolean;
   missed: boolean;
   wentIn: boolean;
@@ -36,16 +33,6 @@ const ballsSlice = createSlice({
       const id = state.count.toString();
       const x = Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1));
       const fallSpeed = Math.random() * 0.5 + 0.5;
-      // ball at rim height at now time plus duration in seconds
-      const rimHeightAt =
-        Date.now() +
-        (MIN_BALL_SPEED *
-          fallSpeed *
-          1000 *
-          ((9 / 10) * window.innerHeight - 60)) /
-          window.innerHeight;
-      // const rimHeightAt = Date.now() + MIN_BALL_SPEED * fallSpeed * 1000;
-      const throughRimAt = rimHeightAt + 500;
 
       state.balls[state.count] = {
         id,
@@ -54,9 +41,6 @@ const ballsSlice = createSlice({
         // duration: Math.floor(Math.random() * 10) + 5,
         // random number between .5 and 1
         fallSpeed,
-        // ball at rim height at now time plus duration in seconds
-        rimHeightAt,
-        throughRimAt,
         hitRim: false,
         missed: false,
         wentIn: false,
