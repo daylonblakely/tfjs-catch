@@ -122,15 +122,12 @@ export const useTrainingLoop = () => {
       inputSize
     );
 
-    // model.remember(state, action, reward, nextState);
-    // await new Promise((resolve) => setTimeout(resolve, 0));
+    model.remember(state, action, reward, nextState);
+
     eps = Math.max(
       gameSettings.minEpsilon,
       eps * Math.exp(-gameSettings.lambda * episode)
     );
-
-    // Yield control back to the browser
-    // await new Promise((resolve) => setTimeout(resolve, 0));
   };
 
   const runTrainingLoop = async (numGames: number, numEpisodes: number) => {
@@ -144,10 +141,12 @@ export const useTrainingLoop = () => {
       }
 
       let episode = 0;
+      dispatch(resetBallState());
 
       const runNextGame = async () => {
         if (episode >= numEpisodes) {
           console.log('Finished Game: ', game);
+          await modelRef.current?.train();
           game++;
           requestAnimationFrame(runNextEpisode);
           return;
@@ -158,7 +157,7 @@ export const useTrainingLoop = () => {
           gameSettings.maxEpsilon,
           episode
         );
-        await modelRef.current?.train();
+        // await modelRef.current?.train();
 
         episode++;
         requestAnimationFrame(runNextGame); // Use requestAnimationFrame for smooth animations

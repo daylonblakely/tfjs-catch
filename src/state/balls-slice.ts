@@ -79,6 +79,7 @@ const ballsSlice = createSlice({
       // state = { ...initialState };
       state.balls = {};
       state.count = 0;
+      state.numActiveBalls = 0;
     },
     updateAllBallY: (state) => {
       for (const ballId in state.balls) {

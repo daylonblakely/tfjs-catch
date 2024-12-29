@@ -53,7 +53,7 @@ function App() {
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
 
-      <button onClick={() => runTrainingLoop(NUM_GAMES, 100)}> Play </button>
+      <button onClick={() => runTrainingLoop(NUM_GAMES, 2000)}> Play </button>
     </div>
   );
 }
