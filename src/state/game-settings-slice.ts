@@ -6,6 +6,7 @@ const initialState = {
   minEpsilon: 0.01,
   maxEpsilon: 0.2,
   lambda: 0.01,
+  numGames: 100,
   numEpisodes: 1000,
 };
 

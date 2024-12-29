@@ -10,8 +10,6 @@ import { useTrainingLoop } from './hooks/use-training-loop';
 
 import { BASKET_Y } from './constants';
 
-const NUM_GAMES = 100;
-
 type BallListProps = {
   balls: { [key: string]: any };
 };
@@ -53,7 +51,7 @@ function App() {
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
 
-      <button onClick={() => runTrainingLoop(NUM_GAMES, 2000)}> Play </button>
+      <button onClick={() => runTrainingLoop()}> Play </button>
     </div>
   );
 }

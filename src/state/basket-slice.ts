@@ -8,7 +8,7 @@ export interface Basket {
 
 const initialState: Basket = {
   x: Math.floor(HORIZONTAL_SECTIONS / 2),
-  velocity: 10,
+  velocity: 1,
 };
 
 const basketSlice = createSlice({

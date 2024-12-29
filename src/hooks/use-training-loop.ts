@@ -96,10 +96,13 @@ export const useTrainingLoop = () => {
     });
   }
 
-  const runEpisode = async (model: Network, eps: number, episode: number) => {
-    const ballsThatHitRim: BallTracker = {};
-    const ballsWentIn: BallTracker = {};
-
+  const runEpisode = async (
+    model: Network,
+    eps: number,
+    episode: number,
+    ballsThatHitRim: BallTracker,
+    ballsWentIn: BallTracker
+  ) => {
     const state = getEnvironmentState(
       basketRef.current.x,
       Object.values(ballsRef.current),
@@ -108,7 +111,7 @@ export const useTrainingLoop = () => {
 
     const action = model.chooseAction(state, eps);
     actions[action]();
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // await new Promise((resolve) => setTimeout(resolve, 100));
     const reward = calculateReward(
       Object.values(ballsRef.current),
       ballsThatHitRim,
@@ -130,11 +133,11 @@ export const useTrainingLoop = () => {
     );
   };
 
-  const runTrainingLoop = async (numGames: number, numEpisodes: number) => {
+  const runTrainingLoop = async () => {
     let game = 0;
 
     const runNextEpisode = async () => {
-      if (game >= numGames) {
+      if (game >= gameSettings.numGames) {
         await modelRef.current?.saveModel();
         console.log('Training done');
         return;
@@ -142,9 +145,11 @@ export const useTrainingLoop = () => {
 
       let episode = 0;
       dispatch(resetBallState());
+      const ballsThatHitRim: BallTracker = {};
+      const ballsWentIn: BallTracker = {};
 
       const runNextGame = async () => {
-        if (episode >= numEpisodes) {
+        if (episode >= gameSettings.numEpisodes) {
           console.log('Finished Game: ', game);
           await modelRef.current?.train();
           game++;
@@ -155,9 +160,12 @@ export const useTrainingLoop = () => {
         await runEpisode(
           modelRef.current as Network,
           gameSettings.maxEpsilon,
-          episode
+          episode,
+          ballsThatHitRim,
+          ballsWentIn
         );
         // await modelRef.current?.train();
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         episode++;
         requestAnimationFrame(runNextGame); // Use requestAnimationFrame for smooth animations
