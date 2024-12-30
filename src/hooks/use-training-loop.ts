@@ -43,19 +43,26 @@ const getEnvironmentState = (
 const calculateReward = (
   balls: Ball[],
   ballsThatHitRim: BallTracker,
-  ballsWentIn: BallTracker
+  ballsWentIn: BallTracker,
+  ballsThatMissed: BallTracker
 ) => {
   let reward = 0;
 
   balls.forEach((ball) => {
     if (ball.hitRim && ball.missed && !ballsThatHitRim[ball.id]) {
-      reward += 1;
+      reward += 100;
       ballsThatHitRim[ball.id] = true;
     }
 
     if (ball.wentIn && !ballsWentIn[ball.id]) {
-      reward += 100;
+      reward += 1000;
       ballsWentIn[ball.id] = true;
+    }
+
+    // punish for missing
+    if (ball.missed && !ballsThatMissed[ball.id]) {
+      reward -= 10;
+      ballsThatMissed[ball.id] = true;
     }
   });
   return reward;
@@ -101,7 +108,8 @@ export const useTrainingLoop = () => {
     eps: number,
     episode: number,
     ballsThatHitRim: BallTracker,
-    ballsWentIn: BallTracker
+    ballsWentIn: BallTracker,
+    ballsThatMissed: BallTracker
   ) => {
     const state = getEnvironmentState(
       basketRef.current.x,
@@ -115,7 +123,8 @@ export const useTrainingLoop = () => {
     const reward = calculateReward(
       Object.values(ballsRef.current),
       ballsThatHitRim,
-      ballsWentIn
+      ballsWentIn,
+      ballsThatMissed
     );
     console.log('Reward: ', reward);
 
@@ -147,6 +156,7 @@ export const useTrainingLoop = () => {
       dispatch(resetBallState());
       const ballsThatHitRim: BallTracker = {};
       const ballsWentIn: BallTracker = {};
+      const ballsThatMissed: BallTracker = {};
 
       const runNextGame = async () => {
         if (episode >= gameSettings.numEpisodes) {
@@ -162,7 +172,8 @@ export const useTrainingLoop = () => {
           gameSettings.maxEpsilon,
           episode,
           ballsThatHitRim,
-          ballsWentIn
+          ballsWentIn,
+          ballsThatMissed
         );
         // await modelRef.current?.train();
         await new Promise((resolve) => setTimeout(resolve, 200));
