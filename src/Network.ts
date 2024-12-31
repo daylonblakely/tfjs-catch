@@ -14,8 +14,8 @@ export class Network {
   private model: Model;
   private memory: ReplayMemory = new ReplayMemory(1000);
   private numActions: number;
-  private batchSize = 32;
-  private discountRate = 0.99;
+  private batchSize = 256;
+  private discountRate = 0.95;
 
   constructor(params: NetworkParams) {
     this.numActions = params.numActions;
