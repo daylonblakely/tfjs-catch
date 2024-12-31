@@ -42,6 +42,7 @@ const getEnvironmentState = (
 
 const calculateReward = (
   balls: Ball[],
+  basketX: number,
   ballsThatHitRim: BallTracker,
   ballsWentIn: BallTracker,
   ballsThatMissed: BallTracker
@@ -49,20 +50,29 @@ const calculateReward = (
   let reward = 0;
 
   balls.forEach((ball) => {
+    // reward for hitting rim
     if (ball.hitRim && ball.missed && !ballsThatHitRim[ball.id]) {
       reward += 100;
       ballsThatHitRim[ball.id] = true;
     }
-
-    if (ball.wentIn && !ballsWentIn[ball.id]) {
+    // reward for making a basket
+    else if (ball.wentIn && !ballsWentIn[ball.id]) {
       reward += 1000;
       ballsWentIn[ball.id] = true;
     }
-
     // punish for missing
-    if (ball.missed && !ballsThatMissed[ball.id]) {
+    else if (ball.missed && !ballsThatMissed[ball.id]) {
       reward -= 10;
       ballsThatMissed[ball.id] = true;
+    }
+    // reward for being lined up with the basket
+    else if (
+      ball.x === basketX &&
+      !ball.missed &&
+      !ball.wentIn &&
+      !ball.hitRim
+    ) {
+      reward += 15;
     }
   });
   return reward;
@@ -119,9 +129,10 @@ export const useTrainingLoop = () => {
 
     const action = model.chooseAction(state, eps);
     actions[action]();
-    // await new Promise((resolve) => setTimeout(resolve, 100));
+
     const reward = calculateReward(
       Object.values(ballsRef.current),
+      basketRef.current.x,
       ballsThatHitRim,
       ballsWentIn,
       ballsThatMissed

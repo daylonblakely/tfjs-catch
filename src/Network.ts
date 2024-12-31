@@ -20,7 +20,7 @@ export class Network {
   constructor(params: NetworkParams) {
     this.numActions = params.numActions;
 
-    if ('model' in params && params.model instanceof Model) {
+    if ('model' in params) {
       this.model = params.model;
     } else if ('hiddenLayerSizes' in params) {
       this.model = new Model(
@@ -129,8 +129,14 @@ export class Network {
 
   // save the model
   async saveModel() {
-    const now = new Date();
-    return await this.model.save(MODEL_SAVE_PATH + now.toISOString());
+    const modelsInfo = await tf.io.listModels();
+    if (MODEL_SAVE_PATH in modelsInfo) {
+      console.log(`Removing existing model at ${MODEL_SAVE_PATH}...`);
+      await tf.io.removeModel(MODEL_SAVE_PATH);
+      console.log(`Existing model removed.`);
+    }
+    console.log(`Saving new model...`);
+    return await this.model.save(MODEL_SAVE_PATH);
   }
 
   // load the model

@@ -7,6 +7,7 @@ import Basket from './components/Basket';
 import { moveLeft, moveRight } from './state/basket-slice';
 import { useGameLoop } from './hooks/use-game-loop';
 import { useTrainingLoop } from './hooks/use-training-loop';
+import { usePlayLoop } from './hooks/use-play-loop';
 
 import { BASKET_Y } from './constants';
 
@@ -29,6 +30,7 @@ function App() {
   const dispatch = useAppDispatch();
   useGameLoop();
   const { runTrainingLoop } = useTrainingLoop();
+  const { play } = usePlayLoop();
 
   return (
     <div>
@@ -51,7 +53,8 @@ function App() {
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
 
-      <button onClick={() => runTrainingLoop()}> Play </button>
+      <button onClick={() => runTrainingLoop()}> Train </button>
+      <button onClick={() => play()}> Play </button>
     </div>
   );
 }
