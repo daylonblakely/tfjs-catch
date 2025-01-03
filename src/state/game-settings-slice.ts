@@ -4,9 +4,9 @@ const initialState = {
   maxBalls: 10,
   minBallSpeed: 5,
   minEpsilon: 0.01,
-  maxEpsilon: 0.2,
-  lambda: 0.01,
-  numGames: 100,
+  maxEpsilon: 0.9,
+  lambda: 0.001,
+  numGames: 200,
   numEpisodes: 1000,
 };
 
