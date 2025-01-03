@@ -137,7 +137,7 @@ export const useTrainingLoop = () => {
       ballsWentIn,
       ballsThatMissed
     );
-    console.log('Reward: ', reward);
+    // console.log('Reward: ', reward);
 
     const nextState = getEnvironmentState(
       basketRef.current.x,

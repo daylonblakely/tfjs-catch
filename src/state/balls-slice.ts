@@ -59,18 +59,18 @@ const ballsSlice = createSlice({
       delete state.balls[action.payload];
     },
     setBallHitRim: (state, action: PayloadAction<string>) => {
-      console.log('hit rim');
+      // console.log('hit rim');
       state.balls[action.payload].hitRim = true;
     },
     setBallWentIn: (state, action: PayloadAction<string>) => {
-      console.log('make');
+      // console.log('make');
       state.balls[action.payload].wentIn = true;
 
       state.balls[action.payload].isActive = false;
       state.numActiveBalls--;
     },
     setBallMissed: (state, action: PayloadAction<string>) => {
-      console.log('miss');
+      // console.log('miss');
       state.balls[action.payload].missed = true;
       state.balls[action.payload].isActive = false;
       state.numActiveBalls--;
