@@ -1,82 +1,14 @@
 import { useEffect, useRef } from 'react';
-import * as tf from '@tensorflow/tfjs';
 import { useAppSelector, useAppDispatch } from '../state/hooks';
 
 import { moveLeft, moveRight } from '../state/basket-slice';
-import { Ball, resetBallState } from '../state/balls-slice';
+import { resetBallState, updateAllBallY } from '../state/balls-slice';
 
 import { Network } from '../Network';
+import { getEnvironmentState } from '../utils/getEnvironmentState';
+import { calculateReward, BallTracker } from '../utils/calculateReward';
 
 import { HORIZONTAL_SECTIONS } from '../constants';
-
-type BallTracker = { [key in string]: boolean };
-
-const getEnvironmentState = (
-  basketPosition: number,
-  balls: Ball[],
-  inputSize: number
-): tf.Tensor2D => {
-  const state = new Array(inputSize).fill(0);
-
-  //   set basket position
-  state[basketPosition] = 1;
-
-  //   set ball positions
-  let ballIndex = 0;
-  balls.forEach((ball) => {
-    if (!ball.isActive) return;
-
-    const positionOffset =
-      HORIZONTAL_SECTIONS + ballIndex * (HORIZONTAL_SECTIONS + 1);
-
-    //   set x position
-    state[positionOffset + ball.x] = 1;
-    // set y position
-    state[positionOffset + HORIZONTAL_SECTIONS] = ball.y;
-
-    ballIndex++;
-  });
-
-  return tf.tensor2d([state]);
-};
-
-const calculateReward = (
-  balls: Ball[],
-  basketX: number,
-  ballsThatHitRim: BallTracker,
-  ballsWentIn: BallTracker,
-  ballsThatMissed: BallTracker
-) => {
-  let reward = 0;
-
-  balls.forEach((ball) => {
-    // reward for hitting rim
-    if (ball.hitRim && ball.missed && !ballsThatHitRim[ball.id]) {
-      reward += 100;
-      ballsThatHitRim[ball.id] = true;
-    }
-    // reward for making a basket
-    else if (ball.wentIn && !ballsWentIn[ball.id]) {
-      reward += 1000;
-      ballsWentIn[ball.id] = true;
-    }
-    // punish for missing
-    else if (ball.missed && !ballsThatMissed[ball.id]) {
-      reward -= 10;
-      ballsThatMissed[ball.id] = true;
-    }
-    // reward for being lined up with the basket
-    else if (
-      ball.x === basketX &&
-      !ball.missed &&
-      !ball.wentIn &&
-      !ball.hitRim
-    ) {
-      reward += 15;
-    }
-  });
-  return reward;
-};
 
 export const useTrainingLoop = () => {
   const balls = useAppSelector((state) => state.balls.balls);
@@ -96,10 +28,28 @@ export const useTrainingLoop = () => {
     ballsRef.current = balls;
   }, [balls]);
 
+  const moveLeftThunk = () => {
+    return async (dispatch: any) => {
+      return new Promise<void>((resolve) => {
+        dispatch(moveLeft());
+        resolve();
+      });
+    };
+  };
+
+  const moveRightThunk = () => {
+    return async (dispatch: any) => {
+      return new Promise<void>((resolve) => {
+        dispatch(moveRight());
+        resolve();
+      });
+    };
+  };
+
   const actions = [
-    () => dispatch(moveLeft()),
-    () => {},
-    () => dispatch(moveRight()),
+    moveLeftThunk,
+    () => async (dispatch: any) => new Promise<void>((resolve) => resolve()),
+    moveRightThunk,
   ];
 
   const inputSize =
@@ -199,5 +149,84 @@ export const useTrainingLoop = () => {
     requestAnimationFrame(runNextEpisode); // Start the first game
   };
 
-  return { runTrainingLoop };
+  const updateAllBallYThunk = (payload: {
+    basketX: number;
+    movedSincedLastRimHit: boolean;
+    plusY: number;
+  }) => {
+    return async (dispatch: any) => {
+      return new Promise<void>((resolve) => {
+        dispatch(updateAllBallY(payload));
+        resolve();
+      });
+    };
+  };
+
+  const resetBallStateThunk = () => {
+    return async (dispatch: any) => {
+      return new Promise<void>((resolve) => {
+        dispatch(resetBallState());
+        resolve();
+      });
+    };
+  };
+
+  const train = async () => {
+    const ballsThatHitRim: BallTracker = {};
+    const ballsWentIn: BallTracker = {};
+    const ballsThatMissed: BallTracker = {};
+    let eps = gameSettings.maxEpsilon;
+
+    for (let i = 0; i < gameSettings.numGames; i++) {
+      await dispatch(resetBallStateThunk());
+      console.log('Starting Game: ', i);
+
+      for (let j = 0; j < gameSettings.numEpisodes; j++) {
+        await dispatch(
+          updateAllBallYThunk({
+            basketX: basketRef.current.x,
+            movedSincedLastRimHit: false,
+            plusY: 20,
+          })
+        );
+
+        const state = getEnvironmentState(
+          basketRef.current.x,
+          Object.values(ballsRef.current),
+          inputSize
+        );
+
+        const action = modelRef.current?.chooseAction(state, eps) ?? 0;
+        await dispatch(actions[action]());
+
+        const reward = calculateReward(
+          Object.values(ballsRef.current),
+          basketRef.current.x,
+          ballsThatHitRim,
+          ballsWentIn,
+          ballsThatMissed
+        );
+
+        const nextState = getEnvironmentState(
+          basketRef.current.x,
+          Object.values(ballsRef.current),
+          inputSize
+        );
+
+        modelRef.current?.remember(state, action, reward, nextState);
+
+        eps = Math.max(
+          gameSettings.minEpsilon,
+          eps * Math.exp(-gameSettings.lambda * j)
+        );
+      }
+
+      await modelRef.current?.train();
+    }
+
+    console.log('Training done');
+    await modelRef.current?.saveModel();
+  };
+
+  return { runTrainingLoop, train };
 };

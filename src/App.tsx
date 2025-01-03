@@ -29,7 +29,7 @@ function App() {
   const balls = useAppSelector((state) => state.balls.balls);
   const dispatch = useAppDispatch();
   useGameLoop();
-  const { runTrainingLoop } = useTrainingLoop();
+  const { runTrainingLoop, train } = useTrainingLoop();
   const { play } = usePlayLoop();
 
   return (
@@ -53,7 +53,7 @@ function App() {
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
 
-      <button onClick={() => runTrainingLoop()}> Train </button>
+      <button onClick={() => train()}> Train </button>
       <button onClick={() => play()}> Play </button>
     </div>
   );
