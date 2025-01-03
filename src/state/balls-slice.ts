@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { HORIZONTAL_SECTIONS, MAX_BALLS, BASKET_Y } from '../constants';
 
+const BALL_SPACING = 100;
+
 export interface Ball {
   id: string;
   x: number;
@@ -19,11 +21,13 @@ const initialState: {
     [key: string]: Ball;
   };
   lastRimHitX: number;
+  lastAddedBallId: number;
 } = {
   count: 0,
   numActiveBalls: 0,
   balls: {},
   lastRimHitX: -1,
+  lastAddedBallId: 0,
 };
 
 const checkIfBallHitRim = (ball: Ball, basketX: number): boolean => {
@@ -55,6 +59,22 @@ const checkIfBallWentIn = (
   }
 };
 
+const createBall = (id: string): Ball => {
+  const x = Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1));
+  const fallSpeed = Math.random() * 0.5 + 0.5;
+
+  return {
+    id,
+    x,
+    y: -100,
+    fallSpeed,
+    hitRim: false,
+    missed: false,
+    wentIn: false,
+    isActive: true,
+  };
+};
+
 const ballsSlice = createSlice({
   name: 'balls',
   initialState,
@@ -64,19 +84,8 @@ const ballsSlice = createSlice({
       if (state.numActiveBalls >= MAX_BALLS) return;
 
       const id = state.count.toString();
-      const x = Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1));
-      const fallSpeed = Math.random() * 0.5 + 0.5;
 
-      state.balls[id] = {
-        id,
-        x,
-        y: -100,
-        fallSpeed,
-        hitRim: false,
-        missed: false,
-        wentIn: false,
-        isActive: true,
-      };
+      state.balls[id] = createBall(id);
 
       state.count++;
       state.numActiveBalls++;
@@ -89,13 +98,33 @@ const ballsSlice = createSlice({
     },
     updateAllBallY: (
       state,
-      action: PayloadAction<{ basketX: number; movedSincedLastRimHit: boolean }>
+      action: PayloadAction<{
+        basketX: number;
+        movedSincedLastRimHit: boolean;
+        plusY: number;
+      }>
     ) => {
+      // add new ball if there is space
+      if (
+        (state.numActiveBalls < MAX_BALLS &&
+          state.balls[state.lastAddedBallId]?.y > BALL_SPACING) ||
+        state.numActiveBalls === 0
+      ) {
+        const id = state.count.toString();
+
+        state.balls[id] = createBall(id);
+        state.lastAddedBallId = state.count;
+
+        state.count++;
+        state.numActiveBalls++;
+      }
+
+      // update y position for all balls
       for (const ballId in state.balls) {
         const ball = state.balls[ballId];
 
         // set ball y position based on current position and fall speed
-        const y = ball.y + 2;
+        const y = ball.y + action.payload.plusY;
         state.balls[ballId].y = y;
 
         // remove if ball is not active and below the screen
@@ -131,15 +160,6 @@ const ballsSlice = createSlice({
   },
 });
 
-export const {
-  addBall,
-  // setBallY,
-  // removeBallById,
-  // setBallHitRim,
-  // setBallWentIn,
-  // setBallMissed,
-  resetBallState,
-  updateAllBallY,
-} = ballsSlice.actions;
+export const { addBall, resetBallState, updateAllBallY } = ballsSlice.actions;
 
 export default ballsSlice.reducer;

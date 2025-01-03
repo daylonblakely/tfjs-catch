@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../state/hooks';
-import { updateAllBallY, addBall } from '../state/balls-slice';
+import { updateAllBallY } from '../state/balls-slice';
 
 export const useGameLoop = () => {
   const lastRimHitX = useAppSelector((state) => state.balls.lastRimHitX);
@@ -16,6 +16,7 @@ export const useGameLoop = () => {
         updateAllBallY({
           basketX: basket.x,
           movedSincedLastRimHit: basket.x !== lastRimHitX,
+          plusY: 2,
         })
       );
 
@@ -30,14 +31,6 @@ export const useGameLoop = () => {
       }
     };
   }, [basket.x, dispatch, lastRimHitX]);
-
-  // Add balls to state every second
-  useEffect(() => {
-    const interval = setInterval(() => {
-      dispatch(addBall());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [dispatch]);
 
   return null;
 };
