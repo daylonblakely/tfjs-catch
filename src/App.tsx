@@ -29,7 +29,7 @@ function App() {
   const balls = useAppSelector((state) => state.balls.balls);
   const dispatch = useAppDispatch();
   useGameLoop();
-  const { runTrainingLoop, train } = useTrainingLoop();
+  const { train } = useTrainingLoop();
   const { play } = usePlayLoop();
 
   return (

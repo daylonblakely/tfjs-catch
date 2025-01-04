@@ -63,91 +63,91 @@ export const useTrainingLoop = () => {
     });
   }
 
-  const runEpisode = async (
-    model: Network,
-    eps: number,
-    episode: number,
-    ballsThatHitRim: BallTracker,
-    ballsWentIn: BallTracker,
-    ballsThatMissed: BallTracker
-  ) => {
-    const state = getEnvironmentState(
-      basketRef.current.x,
-      Object.values(ballsRef.current),
-      inputSize
-    );
+  // const runEpisode = async (
+  //   model: Network,
+  //   eps: number,
+  //   episode: number,
+  //   ballsThatHitRim: BallTracker,
+  //   ballsWentIn: BallTracker,
+  //   ballsThatMissed: BallTracker
+  // ) => {
+  //   const state = getEnvironmentState(
+  //     basketRef.current.x,
+  //     Object.values(ballsRef.current),
+  //     inputSize
+  //   );
 
-    const action = model.chooseAction(state, eps);
-    actions[action]();
+  //   const action = model.chooseAction(state, eps);
+  //   actions[action]();
 
-    const reward = calculateReward(
-      Object.values(ballsRef.current),
-      basketRef.current.x,
-      ballsThatHitRim,
-      ballsWentIn,
-      ballsThatMissed
-    );
-    // console.log('Reward: ', reward);
+  //   const reward = calculateReward(
+  //     Object.values(ballsRef.current),
+  //     basketRef.current.x,
+  //     ballsThatHitRim,
+  //     ballsWentIn,
+  //     ballsThatMissed
+  //   );
+  //   // console.log('Reward: ', reward);
 
-    const nextState = getEnvironmentState(
-      basketRef.current.x,
-      Object.values(ballsRef.current),
-      inputSize
-    );
+  //   const nextState = getEnvironmentState(
+  //     basketRef.current.x,
+  //     Object.values(ballsRef.current),
+  //     inputSize
+  //   );
 
-    model.remember(state, action, reward, nextState);
+  //   model.remember(state, action, reward, nextState);
 
-    eps = Math.max(
-      gameSettings.minEpsilon,
-      eps * Math.exp(-gameSettings.lambda * episode)
-    );
-  };
+  //   eps = Math.max(
+  //     gameSettings.minEpsilon,
+  //     eps * Math.exp(-gameSettings.lambda * episode)
+  //   );
+  // };
 
-  const runTrainingLoop = async () => {
-    let game = 0;
+  // const runTrainingLoop = async () => {
+  //   let game = 0;
 
-    const runNextEpisode = async () => {
-      if (game >= gameSettings.numGames) {
-        await modelRef.current?.saveModel();
-        console.log('Training done');
-        return;
-      }
+  //   const runNextEpisode = async () => {
+  //     if (game >= gameSettings.numGames) {
+  //       await modelRef.current?.saveModel();
+  //       console.log('Training done');
+  //       return;
+  //     }
 
-      let episode = 0;
-      dispatch(resetBallState());
-      const ballsThatHitRim: BallTracker = {};
-      const ballsWentIn: BallTracker = {};
-      const ballsThatMissed: BallTracker = {};
+  //     let episode = 0;
+  //     dispatch(resetBallState());
+  //     const ballsThatHitRim: BallTracker = {};
+  //     const ballsWentIn: BallTracker = {};
+  //     const ballsThatMissed: BallTracker = {};
 
-      const runNextGame = async () => {
-        if (episode >= gameSettings.numEpisodes) {
-          console.log('Finished Game: ', game);
-          await modelRef.current?.train();
-          game++;
-          requestAnimationFrame(runNextEpisode);
-          return;
-        }
+  //     const runNextGame = async () => {
+  //       if (episode >= gameSettings.numEpisodes) {
+  //         console.log('Finished Game: ', game);
+  //         await modelRef.current?.train();
+  //         game++;
+  //         requestAnimationFrame(runNextEpisode);
+  //         return;
+  //       }
 
-        await runEpisode(
-          modelRef.current as Network,
-          gameSettings.maxEpsilon,
-          episode,
-          ballsThatHitRim,
-          ballsWentIn,
-          ballsThatMissed
-        );
-        // await modelRef.current?.train();
-        await new Promise((resolve) => setTimeout(resolve, 200));
+  //       await runEpisode(
+  //         modelRef.current as Network,
+  //         gameSettings.maxEpsilon,
+  //         episode,
+  //         ballsThatHitRim,
+  //         ballsWentIn,
+  //         ballsThatMissed
+  //       );
+  //       // await modelRef.current?.train();
+  //       await new Promise((resolve) => setTimeout(resolve, 200));
 
-        episode++;
-        requestAnimationFrame(runNextGame); // Use requestAnimationFrame for smooth animations
-      };
+  //       episode++;
+  //       requestAnimationFrame(runNextGame); // Use requestAnimationFrame for smooth animations
+  //     };
 
-      requestAnimationFrame(runNextGame); // Start the first episode of the game
-    };
+  //     requestAnimationFrame(runNextGame); // Start the first episode of the game
+  //   };
 
-    requestAnimationFrame(runNextEpisode); // Start the first game
-  };
+  //   requestAnimationFrame(runNextEpisode); // Start the first game
+  // };
 
   const updateAllBallYThunk = (payload: {
     basketX: number;
@@ -186,7 +186,7 @@ export const useTrainingLoop = () => {
           updateAllBallYThunk({
             basketX: basketRef.current.x,
             movedSincedLastRimHit: false,
-            plusY: 20,
+            plusY: 2,
           })
         );
 
@@ -196,6 +196,7 @@ export const useTrainingLoop = () => {
           inputSize
         );
 
+        const previousBasketX = basketRef.current.x;
         const action = modelRef.current?.chooseAction(state, eps) ?? 0;
         await dispatch(actions[action]());
 
@@ -204,7 +205,8 @@ export const useTrainingLoop = () => {
           basketRef.current.x,
           ballsThatHitRim,
           ballsWentIn,
-          ballsThatMissed
+          ballsThatMissed,
+          previousBasketX
         );
 
         const nextState = getEnvironmentState(
@@ -228,5 +230,5 @@ export const useTrainingLoop = () => {
     await modelRef.current?.saveModel();
   };
 
-  return { runTrainingLoop, train };
+  return { train };
 };
