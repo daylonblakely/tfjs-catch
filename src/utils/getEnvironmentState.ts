@@ -2,6 +2,8 @@ import * as tf from '@tensorflow/tfjs';
 import { Ball } from '../state/balls-slice';
 import { HORIZONTAL_SECTIONS } from '../constants';
 
+const ballOffsets = new Map<string, number>();
+
 export const getEnvironmentState = (
   basketPosition: number,
   balls: Ball[],
@@ -9,24 +11,28 @@ export const getEnvironmentState = (
 ): tf.Tensor2D => {
   const state = new Array(inputSize).fill(0);
 
-  //   set basket position
-  state[basketPosition] = 1;
+  // Set basket position
+  state[0] = basketPosition / HORIZONTAL_SECTIONS;
 
-  //   set ball positions
-  let ballIndex = 0;
+  // Set ball positions
   balls.forEach((ball) => {
-    if (!ball.isActive) return;
+    if (!ball.isActive) {
+      // Remove the offset if the ball becomes inactive
+      ballOffsets.delete(ball.id);
+      return;
+    }
 
-    const positionOffset =
-      HORIZONTAL_SECTIONS + ballIndex * (HORIZONTAL_SECTIONS + 1);
+    // Get or assign a position offset for the ball
+    let positionOffset = ballOffsets.get(ball.id);
+    if (positionOffset === undefined) {
+      positionOffset = 1 + ballOffsets.size * 2;
+      ballOffsets.set(ball.id, positionOffset);
+    }
 
-    //   set x position
-    state[positionOffset + ball.x] = 1;
-    // set y position
-    // normalize y position
-    state[positionOffset + HORIZONTAL_SECTIONS] = ball.y / window.innerHeight;
-
-    ballIndex++;
+    // Set x position (normalized)
+    state[positionOffset] = ball.x / HORIZONTAL_SECTIONS;
+    // Set y position (normalized)
+    state[positionOffset + 1] = ball.y / window.innerHeight;
   });
 
   return tf.tensor2d([state]);

@@ -6,9 +6,7 @@ import { resetBallState, updateAllBallY } from '../state/balls-slice';
 
 import { Network } from '../Network';
 import { getEnvironmentState } from '../utils/getEnvironmentState';
-import { calculateReward, BallTracker } from '../utils/calculateReward';
-
-import { HORIZONTAL_SECTIONS } from '../constants';
+import { calculateReward } from '../utils/calculateReward';
 
 export const useTrainingLoop = () => {
   const balls = useAppSelector((state) => state.balls.balls);
@@ -52,8 +50,7 @@ export const useTrainingLoop = () => {
     moveRightThunk,
   ];
 
-  const inputSize =
-    HORIZONTAL_SECTIONS + gameSettings.maxBalls * (HORIZONTAL_SECTIONS + 1);
+  const inputSize = 1 + gameSettings.maxBalls * 2;
 
   if (!modelRef.current) {
     modelRef.current = new Network({
@@ -61,6 +58,12 @@ export const useTrainingLoop = () => {
       inputSize,
       numActions: 3,
     });
+
+    modelRef.current
+      .setBatchSize(gameSettings.batchSize)
+      .setDiscountRate(gameSettings.discountRate)
+      .setMemory(gameSettings.memoryLength)
+      .setLearningRate(gameSettings.learningRate);
   }
 
   // const runEpisode = async (
@@ -172,10 +175,7 @@ export const useTrainingLoop = () => {
   };
 
   const train = async () => {
-    const ballsThatHitRim: BallTracker = {};
-    const ballsWentIn: BallTracker = {};
-    const ballsThatMissed: BallTracker = {};
-    let eps = gameSettings.maxEpsilon;
+    let eps = gameSettings.epsilonDecay;
 
     for (let i = 0; i < gameSettings.numGames; i++) {
       await dispatch(resetBallStateThunk());
@@ -197,15 +197,12 @@ export const useTrainingLoop = () => {
         );
 
         const previousBasketX = basketRef.current.x;
-        const action = modelRef.current?.chooseAction(state, eps) ?? 0;
+        const action = modelRef.current?.chooseAction(state, eps) ?? 1;
         await dispatch(actions[action]());
 
         const reward = calculateReward(
           Object.values(ballsRef.current),
           basketRef.current.x,
-          ballsThatHitRim,
-          ballsWentIn,
-          ballsThatMissed,
           previousBasketX
         );
 
@@ -219,7 +216,7 @@ export const useTrainingLoop = () => {
 
         eps = Math.max(
           gameSettings.minEpsilon,
-          eps * Math.exp(-gameSettings.lambda * j)
+          eps * gameSettings.epsilonDecay
         );
       }
 

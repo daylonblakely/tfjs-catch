@@ -4,9 +4,12 @@ const initialState = {
   maxBalls: 10,
   minBallSpeed: 5,
   minEpsilon: 0.01,
-  maxEpsilon: 0.9,
-  lambda: 0.001,
-  numGames: 500,
+  epsilonDecay: 0.95,
+  batchSize: 128,
+  discountRate: 0.95,
+  learningRate: 0.001,
+  memoryLength: 1000,
+  numGames: 200,
   numEpisodes: 1000,
 };
 
@@ -23,12 +26,6 @@ const gameSettingsSlice = createSlice({
     setMinEpsilon: (state, action: PayloadAction<number>) => {
       state.minEpsilon = action.payload;
     },
-    setMaxEpsilon: (state, action: PayloadAction<number>) => {
-      state.maxEpsilon = action.payload;
-    },
-    setLambda: (state, action: PayloadAction<number>) => {
-      state.lambda = action.payload;
-    },
     setNumEpisodes: (state, action: PayloadAction<number>) => {
       state.numEpisodes = action.payload;
     },
@@ -42,8 +39,6 @@ export const {
   setMaxBalls,
   setMinBallSpeed,
   setMinEpsilon,
-  setMaxEpsilon,
-  setLambda,
   setNumEpisodes,
   setGameSettings,
 } = gameSettingsSlice.actions;

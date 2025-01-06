@@ -28,7 +28,7 @@ const BallList = React.memo(({ balls }: BallListProps) => {
 function App() {
   const balls = useAppSelector((state) => state.balls.balls);
   const dispatch = useAppDispatch();
-  useGameLoop();
+  // useGameLoop();
   const { train } = useTrainingLoop();
   const { play } = usePlayLoop();
 

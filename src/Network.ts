@@ -14,8 +14,9 @@ export class Network {
   private model: Model;
   private memory: ReplayMemory = new ReplayMemory(1000);
   private numActions: number;
-  private batchSize = 64;
+  private batchSize = 128;
   private discountRate = 0.95;
+  private learningRate = 0.001;
 
   constructor(params: NetworkParams) {
     this.numActions = params.numActions;
@@ -47,6 +48,11 @@ export class Network {
 
   setDiscountRate(discountRate: number) {
     this.discountRate = discountRate;
+    return this;
+  }
+
+  setLearningRate(learningRate: number) {
+    this.learningRate = learningRate;
     return this;
   }
 
@@ -91,11 +97,13 @@ export class Network {
     );
 
     // Predict the values of each action at each state
-    const qsa = states.map((state) => this.model.predict(state)) as tf.Tensor[];
+    const qsa = (await Promise.all(
+      states.map((state) => this.model.predict(state))
+    )) as tf.Tensor[];
     // Predict the values of each action at each next state
-    const qsad = nextStates.map((nextState) =>
-      this.model.predict(nextState)
-    ) as tf.Tensor[];
+    const qsad = (await Promise.all(
+      nextStates.map((nextState) => this.model.predict(nextState))
+    )) as tf.Tensor[];
 
     const x: number[][] = [];
     const y: number[][] = [];
@@ -103,18 +111,26 @@ export class Network {
     // Update the states rewards with the discounted next states rewards
     batch.forEach(([state, action, reward, nextState], index) => {
       const currentQ = qsa[index].clone();
-      currentQ.dataSync()[action] = nextState
-        ? reward + this.discountRate * qsad[index].max().dataSync()[0]
-        : reward;
+      const targetQ = currentQ.dataSync();
+
+      if (nextState) {
+        const maxNextQ = qsad[index].max().dataSync()[0];
+        targetQ[action] =
+          targetQ[action] +
+          this.learningRate *
+            (reward + this.discountRate * maxNextQ - targetQ[action]);
+      } else {
+        targetQ[action] = reward;
+      }
 
       x.push(Array.from(state.dataSync()));
-      y.push(Array.from(currentQ.dataSync()));
+      y.push(Array.from(targetQ));
       currentQ.dispose();
     });
 
     // Clean unused tensors
-    qsa.forEach((state) => state.dispose());
-    qsad.forEach((state) => state.dispose());
+    qsa.forEach((tensor) => tensor.dispose());
+    qsad.forEach((tensor) => tensor.dispose());
 
     // Reshape the batches to be fed to the network
     const xBatch = tf.tensor2d(x, [x.length, this.model.inputSize]);
