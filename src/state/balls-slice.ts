@@ -106,9 +106,9 @@ const ballsSlice = createSlice({
     ) => {
       // add new ball if there is space
       if (
+        state.numActiveBalls === 0 ||
         (state.numActiveBalls < MAX_BALLS &&
-          state.balls[state.lastAddedBallId]?.y > BALL_SPACING) ||
-        state.numActiveBalls === 0
+          (state.balls[state.lastAddedBallId]?.y ?? 0) > BALL_SPACING)
       ) {
         const id = state.count.toString();
 

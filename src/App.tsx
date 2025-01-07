@@ -1,34 +1,17 @@
 import React from 'react';
-import { useAppSelector, useAppDispatch } from './state/hooks';
+import { useAppDispatch } from './state/hooks';
 import { addBall } from './state/balls-slice';
-import Ball from './components/Ball';
+import Balls from './components/Balls';
 import Basket from './components/Basket';
 
 import { moveLeft, moveRight } from './state/basket-slice';
-import { useGameLoop } from './hooks/use-game-loop';
 import { useTrainingLoop } from './hooks/use-training-loop';
 import { usePlayLoop } from './hooks/use-play-loop';
 
 import { BASKET_Y } from './constants';
 
-type BallListProps = {
-  balls: { [key: string]: any };
-};
-
-const BallList = React.memo(({ balls }: BallListProps) => {
-  return (
-    <>
-      {Object.keys(balls).map((id) => (
-        <Ball key={id} id={id} />
-      ))}
-    </>
-  );
-});
-
 function App() {
-  const balls = useAppSelector((state) => state.balls.balls);
   const dispatch = useAppDispatch();
-  // useGameLoop();
   const { train } = useTrainingLoop();
   const { play } = usePlayLoop();
 
@@ -45,10 +28,9 @@ function App() {
           width: window.innerWidth,
         }}
       ></div>
-      <BallList balls={balls} />
+      <Balls />
       <Basket />
       <button onClick={() => dispatch(addBall())}>Add Ball</button>
-      <button onClick={() => console.log(balls)}>print</button>
 
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
