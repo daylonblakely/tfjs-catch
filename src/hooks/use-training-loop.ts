@@ -54,7 +54,7 @@ export const useTrainingLoop = () => {
 
   if (!modelRef.current) {
     modelRef.current = new Network({
-      hiddenLayerSizes: [128, 128],
+      hiddenLayerSizes: gameSettings.hiddenLayerSizes,
       inputSize,
       numActions: 3,
     });
@@ -65,92 +65,6 @@ export const useTrainingLoop = () => {
       .setMemory(gameSettings.memoryLength)
       .setLearningRate(gameSettings.learningRate);
   }
-
-  // const runEpisode = async (
-  //   model: Network,
-  //   eps: number,
-  //   episode: number,
-  //   ballsThatHitRim: BallTracker,
-  //   ballsWentIn: BallTracker,
-  //   ballsThatMissed: BallTracker
-  // ) => {
-  //   const state = getEnvironmentState(
-  //     basketRef.current.x,
-  //     Object.values(ballsRef.current),
-  //     inputSize
-  //   );
-
-  //   const action = model.chooseAction(state, eps);
-  //   actions[action]();
-
-  //   const reward = calculateReward(
-  //     Object.values(ballsRef.current),
-  //     basketRef.current.x,
-  //     ballsThatHitRim,
-  //     ballsWentIn,
-  //     ballsThatMissed
-  //   );
-  //   // console.log('Reward: ', reward);
-
-  //   const nextState = getEnvironmentState(
-  //     basketRef.current.x,
-  //     Object.values(ballsRef.current),
-  //     inputSize
-  //   );
-
-  //   model.remember(state, action, reward, nextState);
-
-  //   eps = Math.max(
-  //     gameSettings.minEpsilon,
-  //     eps * Math.exp(-gameSettings.lambda * episode)
-  //   );
-  // };
-
-  // const runTrainingLoop = async () => {
-  //   let game = 0;
-
-  //   const runNextEpisode = async () => {
-  //     if (game >= gameSettings.numGames) {
-  //       await modelRef.current?.saveModel();
-  //       console.log('Training done');
-  //       return;
-  //     }
-
-  //     let episode = 0;
-  //     dispatch(resetBallState());
-  //     const ballsThatHitRim: BallTracker = {};
-  //     const ballsWentIn: BallTracker = {};
-  //     const ballsThatMissed: BallTracker = {};
-
-  //     const runNextGame = async () => {
-  //       if (episode >= gameSettings.numEpisodes) {
-  //         console.log('Finished Game: ', game);
-  //         await modelRef.current?.train();
-  //         game++;
-  //         requestAnimationFrame(runNextEpisode);
-  //         return;
-  //       }
-
-  //       await runEpisode(
-  //         modelRef.current as Network,
-  //         gameSettings.maxEpsilon,
-  //         episode,
-  //         ballsThatHitRim,
-  //         ballsWentIn,
-  //         ballsThatMissed
-  //       );
-  //       // await modelRef.current?.train();
-  //       await new Promise((resolve) => setTimeout(resolve, 200));
-
-  //       episode++;
-  //       requestAnimationFrame(runNextGame); // Use requestAnimationFrame for smooth animations
-  //     };
-
-  //     requestAnimationFrame(runNextGame); // Start the first episode of the game
-  //   };
-
-  //   requestAnimationFrame(runNextEpisode); // Start the first game
-  // };
 
   const updateAllBallYThunk = (payload: {
     basketX: number;

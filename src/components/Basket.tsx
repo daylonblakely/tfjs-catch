@@ -23,16 +23,19 @@ const Basket = () => {
         width: BASKET_WIDTH,
         backgroundColor: 'orange',
         borderRadius: '7.5px',
-      }}
-      animate={{
         x:
           (x / HORIZONTAL_SECTIONS) *
             (window.innerWidth - HORIZONTAL_SPACING * 2) +
           HORIZONTAL_SPACING -
           BASKET_OFFSET,
       }}
-      //   animate={{ y: window.innerHeight }}
-      // transition={{ duration: 6 }}
+      // animate={{
+      //   x:
+      //     (x / HORIZONTAL_SECTIONS) *
+      //       (window.innerWidth - HORIZONTAL_SPACING * 2) +
+      //     HORIZONTAL_SPACING -
+      //     BASKET_OFFSET,
+      // }}
       transition={{ type: 'spring', velocity }}
     ></motion.div>
   );

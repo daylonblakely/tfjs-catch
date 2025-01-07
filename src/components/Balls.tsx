@@ -8,8 +8,6 @@ const Balls = () => {
   return (
     <div>
       {Object.keys(balls).map((id) => {
-        const ball = balls[id];
-        if (!ball.isActive) return null;
         return <Ball key={id} ball={balls[id]} />;
       })}
     </div>
