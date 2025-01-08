@@ -6,6 +6,7 @@ const ballOffsets = new Map<string, number>();
 
 export const getEnvironmentState = (
   basketPosition: number,
+  previousBasketX: number,
   balls: Ball[],
   inputSize: number
 ): tf.Tensor2D => {
@@ -13,6 +14,8 @@ export const getEnvironmentState = (
 
   // Set basket position
   state[0] = basketPosition / HORIZONTAL_SECTIONS;
+  // set velocity
+  state[1] = (basketPosition - previousBasketX) / HORIZONTAL_SECTIONS;
 
   // Set ball positions
   balls.forEach((ball) => {
@@ -25,7 +28,7 @@ export const getEnvironmentState = (
     // Get or assign a position offset for the ball
     let positionOffset = ballOffsets.get(ball.id);
     if (positionOffset === undefined) {
-      positionOffset = 1 + ballOffsets.size * 2;
+      positionOffset = 2 + ballOffsets.size * 2;
       ballOffsets.set(ball.id, positionOffset);
     }
 

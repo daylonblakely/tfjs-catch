@@ -50,7 +50,7 @@ export const useTrainingLoop = () => {
     moveRightThunk,
   ];
 
-  const inputSize = 1 + gameSettings.maxBalls * 2;
+  const inputSize = 2 + gameSettings.maxBalls * 2;
 
   if (!modelRef.current) {
     modelRef.current = new Network({
@@ -95,6 +95,7 @@ export const useTrainingLoop = () => {
       await dispatch(resetBallStateThunk());
       console.log('Starting Game: ', i);
 
+      let previousBasketX = basketRef.current.x;
       for (let j = 0; j < gameSettings.numEpisodes; j++) {
         await dispatch(
           updateAllBallYThunk({
@@ -106,11 +107,12 @@ export const useTrainingLoop = () => {
 
         const state = getEnvironmentState(
           basketRef.current.x,
+          previousBasketX,
           Object.values(ballsRef.current),
           inputSize
         );
 
-        const previousBasketX = basketRef.current.x;
+        previousBasketX = basketRef.current.x;
         const action = modelRef.current?.chooseAction(state, eps) ?? 1;
         await dispatch(actions[action]());
 
@@ -122,6 +124,7 @@ export const useTrainingLoop = () => {
 
         const nextState = getEnvironmentState(
           basketRef.current.x,
+          previousBasketX,
           Object.values(ballsRef.current),
           inputSize
         );

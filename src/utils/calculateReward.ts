@@ -25,13 +25,13 @@ export const calculateReward = (
     const currentDistance = Math.abs(closestBall.x - basketX);
 
     if (currentDistance === 0) {
-      reward += 200; // Reward for catching the ball
+      reward += 500; // Reward for catching the ball
     }
 
     if (currentDistance < previousDistance) {
       reward += 50; // Reward for moving closer to the closest ball
     } else if (currentDistance > previousDistance) {
-      reward -= 50; // Negative reward for moving away from the closest ball
+      reward -= 100 * currentDistance; // Negative reward for moving away from the closest ball
     }
   }
 

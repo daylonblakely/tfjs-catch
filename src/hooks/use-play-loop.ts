@@ -21,7 +21,7 @@ export const usePlayLoop = () => {
     [dispatch]
   );
 
-  const inputSize = 1 + gameSettings.maxBalls * 2;
+  const inputSize = 2 + gameSettings.maxBalls * 2;
 
   const basketX = useRef(basket.x);
   const lastRimHitXRef = useRef(lastRimHitX);
@@ -35,6 +35,7 @@ export const usePlayLoop = () => {
   }, [lastRimHitX]);
 
   const animationFrameId = useRef<number | null>(null);
+  const previousBasketX = useRef(basket.x);
 
   const update = () => {
     // Update y for all balls
@@ -48,10 +49,12 @@ export const usePlayLoop = () => {
 
     const state = getEnvironmentState(
       basket.x,
+      previousBasketX.current,
       Object.values(balls),
       inputSize
     );
 
+    previousBasketX.current = basket.x;
     if (modelRef.current) {
       const action = modelRef.current.chooseAction(state, 0);
       actions[action]();
