@@ -89,7 +89,7 @@ export const useTrainingLoop = () => {
   };
 
   const train = async () => {
-    let eps = gameSettings.epsilonDecay;
+    let eps = gameSettings.epsilonStart;
 
     for (let i = 0; i < gameSettings.numGames; i++) {
       await dispatch(resetBallStateThunk());
@@ -101,7 +101,7 @@ export const useTrainingLoop = () => {
           updateAllBallYThunk({
             basketX: basketRef.current.x,
             movedSincedLastRimHit: false,
-            plusY: 2,
+            plusY: 20,
           })
         );
 

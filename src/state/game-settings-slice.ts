@@ -4,14 +4,15 @@ const initialState = {
   maxBalls: 10,
   minBallSpeed: 5,
   minEpsilon: 0.01,
-  epsilonDecay: 0.95,
-  batchSize: 256,
-  discountRate: 0.95,
-  learningRate: 0.01,
-  memoryLength: 1000,
-  numGames: 200,
+  epsilonStart: 1,
+  epsilonDecay: 0.995,
+  batchSize: 128,
+  discountRate: 0.99,
+  learningRate: 0.0005,
+  memoryLength: 10000,
+  numGames: 1000,
   numEpisodes: 1000,
-  hiddenLayerSizes: [128, 128],
+  hiddenLayerSizes: [128, 128, 128],
 };
 
 const gameSettingsSlice = createSlice({

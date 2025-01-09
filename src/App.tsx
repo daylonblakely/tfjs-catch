@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppDispatch } from './state/hooks';
 import { addBall } from './state/balls-slice';
 import Balls from './components/Balls';
@@ -15,6 +15,8 @@ function App() {
   const { train } = useTrainingLoop();
   const { play } = usePlayLoop();
 
+  const [showBalls, setShowBalls] = useState(false);
+
   return (
     <div>
       <div
@@ -28,15 +30,33 @@ function App() {
           width: window.innerWidth,
         }}
       ></div>
-      <Balls />
-      <Basket />
+      {showBalls ? (
+        <>
+          <Balls />
+          <Basket />
+        </>
+      ) : null}
       <button onClick={() => dispatch(addBall())}>Add Ball</button>
 
       <button onClick={() => dispatch(moveLeft())}>Move Left</button>
       <button onClick={() => dispatch(moveRight())}>Move Right</button>
 
-      <button onClick={() => train()}> Train </button>
-      <button onClick={() => play()}> Play </button>
+      <button
+        onClick={() => {
+          setShowBalls(false);
+          train();
+        }}
+      >
+        Train
+      </button>
+      <button
+        onClick={() => {
+          setShowBalls(true);
+          play();
+        }}
+      >
+        Play
+      </button>
     </div>
   );
 }
