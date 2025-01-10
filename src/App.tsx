@@ -12,7 +12,7 @@ import { BASKET_Y } from './constants';
 
 function App() {
   const dispatch = useAppDispatch();
-  const { train } = useTrainingLoop();
+  const { train, trainWithoutState } = useTrainingLoop();
   const { play } = usePlayLoop();
 
   const [showBalls, setShowBalls] = useState(false);
@@ -49,6 +49,7 @@ function App() {
       >
         Train
       </button>
+      <button onClick={trainWithoutState}>Train Without State</button>
       <button
         onClick={() => {
           setShowBalls(true);

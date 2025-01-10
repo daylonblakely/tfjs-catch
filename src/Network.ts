@@ -72,7 +72,13 @@ export class Network {
         // normalize to sum to 1
         const probs = tf.div(sigmoid, tf.sum(sigmoid)) as tf.Tensor1D;
         // randomly sample from dist
-        return tf.multinomial(probs, 1).dataSync()[0];
+        const action = tf.multinomial(probs, 1).dataSync()[0];
+        // clean up tensors
+        logits.dispose();
+        sigmoid.dispose();
+        probs.dispose();
+
+        return action;
       });
     }
   }
@@ -91,19 +97,27 @@ export class Network {
   async train() {
     // Sample from memory
     const batch = this.memory.sample(this.batchSize);
-    const states = batch.map(([state, , ,]) => state);
-    const nextStates = batch.map(([, , , nextState]) =>
-      nextState ? nextState : tf.zeros([this.model.inputSize])
+    const [states, nextStates] = batch.reduce(
+      ([states, nextStates], [state, , , nextState]) => {
+        states.push(state);
+        nextStates.push(
+          nextState ? nextState : tf.zeros([this.model.inputSize])
+        );
+        return [states, nextStates];
+      },
+      [[], []] as [tf.Tensor[], tf.Tensor[]]
     );
 
     // Predict the values of each action at each state
-    const qsa = (await Promise.all(
-      states.map((state) => this.model.predict(state))
-    )) as tf.Tensor[];
-    // Predict the values of each action at each next state
-    const qsad = (await Promise.all(
-      nextStates.map((nextState) => this.model.predict(nextState))
-    )) as tf.Tensor[];
+    const [qsa, qsad] = states.reduce(
+      ([qsa, qsad], state, i) => {
+        qsa.push(this.model.predict(state) as tf.Tensor);
+        qsad.push(this.model.predict(nextStates[i]) as tf.Tensor);
+
+        return [qsa, qsad];
+      },
+      [[], []] as [tf.Tensor[], tf.Tensor[]]
+    );
 
     const x: number[][] = [];
     const y: number[][] = [];
