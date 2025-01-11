@@ -3,8 +3,6 @@ import { Ball } from '../state/balls-slice';
 import { Basket } from '../state/basket-slice';
 import { HORIZONTAL_SECTIONS } from '../constants';
 
-const ballOffsets: { [key in string]: number } = {};
-
 export const getEnvironmentState = (
   basket: Basket,
   balls: Ball[],
@@ -17,27 +15,6 @@ export const getEnvironmentState = (
   // set velocity
   state[1] = basket.velocity / HORIZONTAL_SECTIONS;
 
-  // Set ball positions
-  // balls.forEach((ball) => {
-  //   if (!ball.isActive) {
-  //     // Remove the offset if the ball becomes inactive
-  //     // ballOffsets.delete(ball.id);
-  //     delete ballOffsets[ball.id];
-  //     return;
-  //   }
-
-  //   // Get or assign a position offset for the ball
-  //   let positionOffset = ballOffsets[ball.id];
-  //   if (positionOffset === undefined) {
-  //     // get next available positionOffset starting at 2
-  //     for (let i = 2; i < inputSize; i += 2) {
-  //       if (!Object.values(ballOffsets).includes(i)) {
-  //         positionOffset = i;
-  //         ballOffsets[ball.id] = positionOffset;
-  //         break;
-  //       }
-  //     }
-  //   }
   balls
     .filter((ball) => ball.isActive)
     .forEach((ball, i) => {
