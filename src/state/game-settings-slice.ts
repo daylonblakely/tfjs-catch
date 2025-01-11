@@ -8,9 +8,9 @@ const initialState = {
   epsilonDecay: 0.995,
   batchSize: 64,
   discountRate: 0.95,
-  learningRate: 0.0001,
+  learningRate: 0.001,
   memoryLength: 10000,
-  numGames: 500,
+  numGames: 2000,
   numEpisodes: 1000,
   hiddenLayerSizes: [128, 128, 128],
 };

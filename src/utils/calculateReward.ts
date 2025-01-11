@@ -49,9 +49,9 @@ export const calculateReward = (balls: Ball[], basket: Basket) => {
     } else if (basket.velocity === -1 && basket.x > closestBall.x) {
       reward += 50; // Reward for moving closer to the closest ball
     } else if (basket.velocity === 1 && basket.x > closestBall.x) {
-      reward -= 50; // Negative reward for moving away from the closest ball
+      reward -= 60; // Negative reward for moving away from the closest ball
     } else if (basket.velocity === -1 && basket.x < closestBall.x) {
-      reward -= 50; // Negative reward for moving away from the closest ball
+      reward -= 60; // Negative reward for moving away from the closest ball
     } else if (basket.velocity === 0) {
       reward -= 100; // Negative reward for not moving
     }
