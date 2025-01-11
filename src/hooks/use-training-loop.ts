@@ -97,7 +97,6 @@ export const useTrainingLoop = () => {
       await dispatch(resetBallStateThunk());
       console.log('Starting Game: ', i);
 
-      let previousBasketX = basketRef.current.x;
       for (let j = 0; j < gameSettings.numEpisodes; j++) {
         await dispatch(
           updateAllBallYThunk({
@@ -108,25 +107,21 @@ export const useTrainingLoop = () => {
         );
 
         const state = getEnvironmentState(
-          basketRef.current.x,
-          previousBasketX,
+          basketRef.current,
           Object.values(ballsRef.current),
           inputSize
         );
 
-        previousBasketX = basketRef.current.x;
         const action = modelRef.current?.chooseAction(state, eps) ?? 1;
         await dispatch(actions[action]());
 
         const reward = calculateReward(
           Object.values(ballsRef.current),
-          basketRef.current.x,
-          previousBasketX
+          basketRef.current
         );
 
         const nextState = getEnvironmentState(
-          basketRef.current.x,
-          previousBasketX,
+          basketRef.current,
           Object.values(ballsRef.current),
           inputSize
         );
@@ -218,50 +213,43 @@ export const useTrainingLoop = () => {
   };
 
   const trainWithoutState = async () => {
-    let eps = gameSettings.epsilonStart;
-
     for (let i = 0; i < gameSettings.numGames; i++) {
       console.log('Starting Game: ', i);
+      let eps = gameSettings.epsilonStart;
       let mockBalls: Ball[] = [];
       let mockBasket: Basket = {
         x: Math.floor(HORIZONTAL_SECTIONS / 2),
         velocity: 1,
       };
+      let state = getEnvironmentState(mockBasket, mockBalls, inputSize);
       for (let j = 0; j < gameSettings.numEpisodes; j++) {
+        // step
         mockBalls = updateMockBalls(
           mockBalls,
           mockBasket.x,
           mockBasket.velocity !== 0
         );
-        // get state
-        const state = getEnvironmentState(
-          mockBasket.x,
-          mockBasket.x + mockBasket.velocity,
-          mockBalls,
-          inputSize
-        );
         // choose action
-        const action = modelRef.current?.chooseAction(state, eps) ?? 1;
+        const action = modelRef.current!.chooseAction(state, eps);
         // update basket
         mockBasket = updateMockBasket(mockBasket, action);
-
         // get reward
-        const reward = calculateReward(
-          mockBalls,
-          mockBasket.x,
-          mockBasket.x + mockBasket.velocity
-        );
-
+        const reward = calculateReward(mockBalls, mockBasket);
         // get next state
-        const nextState = getEnvironmentState(
-          mockBasket.x,
-          mockBasket.x + mockBasket.velocity,
-          mockBalls,
-          inputSize
-        );
+        const nextState = getEnvironmentState(mockBasket, mockBalls, inputSize);
+        // if (j % 100 === 0) {
+        //   console.log('---------------------------');
+        //   console.log('state: ', state.dataSync());
+        //   console.log('action: ', action);
+        //   console.log('reward: ', reward);
+        //   console.log('nextState: ', nextState.dataSync());
+        //   console.log('---------------------------');
+        // }
 
         // remember
         modelRef.current?.remember(state, action, reward, nextState);
+        // update state
+        state = nextState;
 
         // update epsilon
         eps = Math.max(

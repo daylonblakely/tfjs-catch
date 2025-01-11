@@ -23,16 +23,21 @@ export const usePlayLoop = () => {
 
   const inputSize = 2 + gameSettings.maxBalls * 2;
 
-  const basketX = useRef(basket.x);
+  const basketRef = useRef(basket);
   const lastRimHitXRef = useRef(lastRimHitX);
+  const ballsRef = useRef(balls);
 
   useEffect(() => {
-    basketX.current = basket.x;
-  }, [basket.x]);
+    basketRef.current = basket;
+  }, [basket]);
 
   useEffect(() => {
     lastRimHitXRef.current = lastRimHitX;
   }, [lastRimHitX]);
+
+  useEffect(() => {
+    ballsRef.current = balls;
+  }, [balls]);
 
   const animationFrameId = useRef<number | null>(null);
   const previousBasketX = useRef(basket.x);
@@ -41,16 +46,15 @@ export const usePlayLoop = () => {
     // Update y for all balls
     dispatch(
       updateAllBallY({
-        basketX: basketX.current,
-        movedSincedLastRimHit: basketX.current !== lastRimHitXRef.current,
+        basketX: basketRef.current.x,
+        movedSincedLastRimHit: basketRef.current.x !== lastRimHitXRef.current,
         plusY: 2,
       })
     );
 
     const state = getEnvironmentState(
-      basket.x,
-      previousBasketX.current,
-      Object.values(balls),
+      basketRef.current,
+      Object.values(ballsRef.current),
       inputSize
     );
 
