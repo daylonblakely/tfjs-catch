@@ -28,30 +28,6 @@ export const useTrainingLoop = () => {
     ballsRef.current = balls;
   }, [balls]);
 
-  const moveLeftThunk = () => {
-    return async (dispatch: any) => {
-      return new Promise<void>((resolve) => {
-        dispatch(moveLeft());
-        resolve();
-      });
-    };
-  };
-
-  const moveRightThunk = () => {
-    return async (dispatch: any) => {
-      return new Promise<void>((resolve) => {
-        dispatch(moveRight());
-        resolve();
-      });
-    };
-  };
-
-  const actions = [
-    moveLeftThunk,
-    () => async (dispatch: any) => new Promise<void>((resolve) => resolve()),
-    moveRightThunk,
-  ];
-
   const inputSize = 2 + gameSettings.maxBalls * 2;
 
   if (!modelRef.current) {
@@ -67,79 +43,6 @@ export const useTrainingLoop = () => {
       .setMemory(gameSettings.memoryLength)
       .setLearningRate(gameSettings.learningRate);
   }
-
-  const updateAllBallYThunk = (payload: {
-    basketX: number;
-    movedSincedLastRimHit: boolean;
-    plusY: number;
-  }) => {
-    return async (dispatch: any) => {
-      return new Promise<void>((resolve) => {
-        dispatch(updateAllBallY(payload));
-        resolve();
-      });
-    };
-  };
-
-  const resetBallStateThunk = () => {
-    return async (dispatch: any) => {
-      return new Promise<void>((resolve) => {
-        dispatch(resetBallState());
-        resolve();
-      });
-    };
-  };
-
-  const train = async () => {
-    let eps = gameSettings.epsilonStart;
-
-    for (let i = 0; i < gameSettings.numGames; i++) {
-      await dispatch(resetBallStateThunk());
-      console.log('Starting Game: ', i);
-
-      for (let j = 0; j < gameSettings.numEpisodes; j++) {
-        await dispatch(
-          updateAllBallYThunk({
-            basketX: basketRef.current.x,
-            movedSincedLastRimHit: false,
-            plusY: 20,
-          })
-        );
-
-        const state = getEnvironmentState(
-          basketRef.current,
-          Object.values(ballsRef.current),
-          inputSize
-        );
-
-        const action = modelRef.current?.chooseAction(state, eps) ?? 1;
-        await dispatch(actions[action]());
-
-        const reward = calculateReward(
-          Object.values(ballsRef.current),
-          basketRef.current
-        );
-
-        const nextState = getEnvironmentState(
-          basketRef.current,
-          Object.values(ballsRef.current),
-          inputSize
-        );
-
-        modelRef.current?.remember(state, action, reward, nextState);
-
-        eps = Math.max(
-          gameSettings.minEpsilon,
-          eps * gameSettings.epsilonDecay
-        );
-      }
-
-      await modelRef.current?.train();
-    }
-
-    console.log('Training done');
-    await modelRef.current?.saveModel();
-  };
 
   const updateMockBalls = (
     mockBalls: Ball[],
@@ -237,20 +140,10 @@ export const useTrainingLoop = () => {
         const reward = calculateReward(mockBalls, mockBasket);
         // get next state
         const nextState = getEnvironmentState(mockBasket, mockBalls, inputSize);
-        // if (j % 100 === 0) {
-        //   console.log('---------------------------');
-        //   console.log('state: ', state.dataSync());
-        //   console.log('action: ', action);
-        //   console.log('reward: ', reward);
-        //   console.log('nextState: ', nextState.dataSync());
-        //   console.log('---------------------------');
-        // }
-
         // remember
         modelRef.current?.remember(state, action, reward, nextState);
         // update state
         state = nextState;
-
         // update epsilon
         eps = Math.max(
           gameSettings.minEpsilon,
@@ -265,5 +158,5 @@ export const useTrainingLoop = () => {
     await modelRef.current?.saveModel();
   };
 
-  return { train, trainWithoutState };
+  return { trainWithoutState };
 };

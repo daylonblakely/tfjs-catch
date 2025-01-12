@@ -16,21 +16,12 @@ export const calculateReward = (balls: Ball[], basket: Basket) => {
     }
   });
 
-  // Reward for moving toward the closest ball to catch
-  if (closestBall) {
-    if (basket.x === closestBall.x) {
-      reward += 200; // Reward for catching the ball
-    } else if (basket.velocity === 1 && basket.x < closestBall.x) {
-      reward += 50; // Reward for moving closer to the closest ball
-    } else if (basket.velocity === -1 && basket.x > closestBall.x) {
-      reward += 50; // Reward for moving closer to the closest ball
-    } else if (basket.velocity === 1 && basket.x > closestBall.x) {
-      reward -= 60; // Negative reward for moving away from the closest ball
-    } else if (basket.velocity === -1 && basket.x < closestBall.x) {
-      reward -= 60; // Negative reward for moving away from the closest ball
-    } else if (basket.velocity === 0) {
-      reward -= 100; // Negative reward for not moving
-    }
+  if (basket.x === closestBall.x) {
+    reward += 200; // Reward for catching the ball
+  }
+
+  if (Math.abs(basket.velocity)) {
+    reward -= 10;
   }
 
   return reward;

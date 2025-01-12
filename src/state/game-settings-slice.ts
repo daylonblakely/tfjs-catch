@@ -5,13 +5,13 @@ const initialState = {
   minBallSpeed: 5,
   minEpsilon: 0.01,
   epsilonStart: 1,
-  epsilonDecay: 0.995,
+  epsilonDecay: 0.997,
   batchSize: 64,
   discountRate: 0.95,
-  learningRate: 0.0005,
+  learningRate: 0.001,
   memoryLength: 10000,
-  numGames: 2000,
-  numEpisodes: 1000,
+  numGames: 3000,
+  numEpisodes: 500,
   hiddenLayerSizes: [128, 128, 128],
 };
 
