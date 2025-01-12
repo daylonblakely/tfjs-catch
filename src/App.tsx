@@ -8,8 +8,6 @@ import { moveLeft, moveRight } from './state/basket-slice';
 import { useTrainingLoop } from './hooks/use-training-loop';
 import { usePlayLoop } from './hooks/use-play-loop';
 
-import { BASKET_Y } from './constants';
-
 function App() {
   const dispatch = useAppDispatch();
   const { trainWithoutState } = useTrainingLoop();
@@ -19,17 +17,6 @@ function App() {
 
   return (
     <div>
-      <div
-        style={{
-          position: 'absolute',
-          background: 'red',
-          // top: ((10 - 1) / 10) * window.innerHeight,
-          transform: `translateY(${BASKET_Y}px)`,
-
-          height: 1,
-          width: window.innerWidth,
-        }}
-      ></div>
       {showBalls ? (
         <>
           <Balls />
