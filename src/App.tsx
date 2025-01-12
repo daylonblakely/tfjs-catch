@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppDispatch } from './state/hooks';
 import { addBall } from './state/balls-slice';
+import BasketballCourt from './components/BasketballCourt';
 import Balls from './components/Balls';
 import Basket from './components/Basket';
 
@@ -16,27 +17,30 @@ function App() {
   const [showBalls, setShowBalls] = useState(false);
 
   return (
-    <div>
-      {showBalls ? (
-        <>
-          <Balls />
-          <Basket />
-        </>
-      ) : null}
-      <button onClick={() => dispatch(addBall())}>Add Ball</button>
+    <>
+      <BasketballCourt />
+      <div>
+        {showBalls ? (
+          <>
+            <Balls />
+            <Basket />
+          </>
+        ) : null}
+        <button onClick={() => dispatch(addBall())}>Add Ball</button>
 
-      <button onClick={() => dispatch(moveLeft())}>Move Left</button>
-      <button onClick={() => dispatch(moveRight())}>Move Right</button>
-      <button onClick={trainWithoutState}>Train Without State</button>
-      <button
-        onClick={() => {
-          setShowBalls(true);
-          play();
-        }}
-      >
-        Play
-      </button>
-    </div>
+        <button onClick={() => dispatch(moveLeft())}>Move Left</button>
+        <button onClick={() => dispatch(moveRight())}>Move Right</button>
+        <button onClick={trainWithoutState}>Train Without State</button>
+        <button
+          onClick={() => {
+            setShowBalls(true);
+            play();
+          }}
+        >
+          Play
+        </button>
+      </div>
+    </>
   );
 }
 
