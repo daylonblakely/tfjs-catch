@@ -23,12 +23,14 @@ const initialState: {
   };
   lastRimHitX: number;
   lastAddedBallId: number;
+  ballsMadeCount: number;
 } = {
   count: 0,
   numActiveBalls: 0,
   balls: {},
   lastRimHitX: -1,
   lastAddedBallId: 0,
+  ballsMadeCount: 0,
 };
 
 const createBall = (id: string): Ball => {
@@ -120,6 +122,7 @@ const ballsSlice = createSlice({
 
         if (ballStatus === 'wentIn') {
           state.balls[ballId].wentIn = true;
+          state.ballsMadeCount++;
           state.balls[ballId].isActive = false;
           state.numActiveBalls--;
         } else if (ballStatus === 'missed') {
