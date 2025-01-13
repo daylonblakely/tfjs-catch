@@ -33,6 +33,7 @@ const Basket = () => {
           border: '2px solid black',
           borderRadius: '5px',
           zIndex: -1, // Place the backboard behind the rim and net
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
         }}
       ></div>
       <div

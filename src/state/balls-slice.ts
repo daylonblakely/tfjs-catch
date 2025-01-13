@@ -69,6 +69,7 @@ const ballsSlice = createSlice({
       state.count = 0;
       state.numActiveBalls = 0;
       state.lastRimHitX = -1;
+      state.ballsMadeCount = 0;
     },
     updateAllBallY: (
       state,

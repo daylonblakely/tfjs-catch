@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import BasketballCourt from './components/BasketballCourt';
 import Scoreboard from './components/Scoreboard';
+import GameSettingsForm from './components/GameSettingsForm';
 import Balls from './components/Balls';
 import Basket from './components/Basket';
 
@@ -10,14 +11,20 @@ import { usePlayLoop } from './hooks/use-play-loop';
 function App() {
   const { trainWithoutState } = useTrainingLoop();
   const { play } = usePlayLoop();
+  const [showTrainingModal, setshowTrainingModal] = useState(false);
 
   return (
     <div>
       <BasketballCourt />
       <Scoreboard />
+      {showTrainingModal ? (
+        <GameSettingsForm onClose={() => setshowTrainingModal(false)} />
+      ) : null}
       <Balls />
       <Basket />
-      <button onClick={trainWithoutState}>Train</button>
+      <button onClick={() => setshowTrainingModal(true)}>
+        Open Training Settings
+      </button>
       <button onClick={play}>Play</button>
     </div>
   );

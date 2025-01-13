@@ -3,6 +3,7 @@ import { useAppSelector, useAppDispatch } from '../state/hooks';
 
 import { Basket, moveLeft, moveRight } from '../state/basket-slice';
 import { Ball, resetBallState, updateAllBallY } from '../state/balls-slice';
+import { setIsTraining } from '../state/game-settings-slice';
 
 import { Network } from '../Network';
 import { getEnvironmentState } from '../utils/getEnvironmentState';
@@ -116,7 +117,8 @@ export const useTrainingLoop = () => {
   };
 
   const trainWithoutState = async () => {
-    for (let i = 0; i < gameSettings.numGames; i++) {
+    dispatch(setIsTraining(true));
+    for (let i = 0; i < gameSettings.numEpisodes; i++) {
       console.log('Starting Game: ', i);
       let eps = gameSettings.epsilonStart;
       let mockBalls: Ball[] = [];
@@ -125,7 +127,7 @@ export const useTrainingLoop = () => {
         velocity: 1,
       };
       let state = getEnvironmentState(mockBasket, mockBalls, inputSize);
-      for (let j = 0; j < gameSettings.numEpisodes; j++) {
+      for (let j = 0; j < gameSettings.stepsPerEpisode; j++) {
         // step
         mockBalls = updateMockBalls(
           mockBalls,
@@ -156,6 +158,7 @@ export const useTrainingLoop = () => {
 
     console.log('Training done');
     await modelRef.current?.saveModel();
+    dispatch(setIsTraining(false));
   };
 
   return { trainWithoutState };

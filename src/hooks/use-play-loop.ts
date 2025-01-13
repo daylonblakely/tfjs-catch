@@ -60,8 +60,13 @@ export const usePlayLoop = () => {
 
     previousBasketX.current = basket.x;
     if (modelRef.current) {
-      const action = modelRef.current.chooseAction(state, 0);
-      actions[action]();
+      try {
+        const action = modelRef.current.chooseAction(state, 0);
+        actions[action]();
+      } catch (error) {
+        alert(error);
+        return;
+      }
     }
 
     animationFrameId.current = requestAnimationFrame(update);
