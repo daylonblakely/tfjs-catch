@@ -1,5 +1,5 @@
 import { Ball } from '../state/balls-slice';
-import { BASKET_Y } from '../constants';
+import { BASKET_Y, HORIZONTAL_SECTIONS, MAX_BALLS } from '../constants';
 
 export const checkIfBallHitRim = (ball: Ball, basketX: number): boolean => {
   if (ball.hitRim) return true;
@@ -28,4 +28,60 @@ export const checkIfBallWentIn = (
   } else {
     return 'missed';
   }
+};
+
+export const createBall = (id: string): Ball => {
+  const x = Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1));
+  const fallSpeed = Math.ceil(Math.random() * 2);
+
+  return {
+    id,
+    x,
+    y: -100,
+    fallSpeed,
+    hitRim: false,
+    missed: false,
+    wentIn: false,
+    isActive: true,
+  };
+};
+
+export const updateBalls = (
+  balls: Ball[],
+  basketX: number,
+  movedSincedLastRimHit: boolean
+): Ball[] => {
+  const lastAddedBall = balls[balls.length - 1];
+  if (!balls.length || (lastAddedBall.y > 100 && balls.length < MAX_BALLS)) {
+    balls.push(createBall(balls.length.toString()));
+  }
+
+  return balls.reduce((acc, ball) => {
+    if (!ball.isActive && ball.y > BASKET_Y + 100) {
+      return acc;
+    }
+
+    const newY = ball.y + 20;
+    const newBall = { ...ball, y: newY };
+
+    if (!ball.hitRim && checkIfBallHitRim(ball, basketX)) {
+      newBall.hitRim = true;
+    }
+
+    const ballStatus = checkIfBallWentIn(
+      newBall,
+      basketX,
+      movedSincedLastRimHit
+    );
+
+    if (ballStatus === 'wentIn') {
+      newBall.wentIn = true;
+      newBall.isActive = false;
+    } else if (ballStatus === 'missed') {
+      newBall.missed = true;
+      newBall.isActive = false;
+    }
+
+    return [...acc, newBall];
+  }, [] as Ball[]);
 };

@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { checkIfBallHitRim, checkIfBallWentIn } from '../utils/ballUtils';
-import { HORIZONTAL_SECTIONS, MAX_BALLS, BASKET_Y } from '../constants';
+import { createBall } from '../utils/ballUtils';
+import { MAX_BALLS, BASKET_Y } from '../constants';
 
 const BALL_SPACING = 100;
 
@@ -31,22 +32,6 @@ const initialState: {
   lastRimHitX: -1,
   lastAddedBallId: 0,
   ballsMadeCount: 0,
-};
-
-const createBall = (id: string): Ball => {
-  const x = Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1));
-  const fallSpeed = Math.random() * 0.5 + 0.5;
-
-  return {
-    id,
-    x,
-    y: -100,
-    fallSpeed,
-    hitRim: false,
-    missed: false,
-    wentIn: false,
-    isActive: true,
-  };
 };
 
 const ballsSlice = createSlice({
@@ -99,7 +84,7 @@ const ballsSlice = createSlice({
         const ball = state.balls[ballId];
 
         // set ball y position based on current position and fall speed
-        const y = ball.y + action.payload.plusY;
+        const y = ball.y + action.payload.plusY * ball.fallSpeed;
         state.balls[ballId].y = y;
 
         // remove if ball is not active and below the screen

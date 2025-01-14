@@ -8,7 +8,12 @@ import { setIsTraining } from '../state/game-settings-slice';
 import { Network } from '../Network';
 import { getEnvironmentState } from '../utils/getEnvironmentState';
 import { calculateReward } from '../utils/calculateReward';
-import { checkIfBallHitRim, checkIfBallWentIn } from '../utils/ballUtils';
+import {
+  checkIfBallHitRim,
+  checkIfBallWentIn,
+  createBall,
+  updateBalls,
+} from '../utils/ballUtils';
 import { BASKET_Y, HORIZONTAL_SECTIONS, MAX_BALLS } from '../constants';
 
 export const useTrainingLoop = () => {
@@ -45,58 +50,6 @@ export const useTrainingLoop = () => {
       .setLearningRate(gameSettings.learningRate);
   }
 
-  const updateMockBalls = (
-    mockBalls: Ball[],
-    basketX: number,
-    movedSincedLastRimHit: boolean
-  ): Ball[] => {
-    const lastAddedBall = mockBalls[mockBalls.length - 1];
-    if (
-      !mockBalls.length ||
-      (lastAddedBall.y > 100 && mockBalls.length < MAX_BALLS)
-    ) {
-      mockBalls.push({
-        id: mockBalls.length.toString(),
-        x: Math.floor(Math.random() * HORIZONTAL_SECTIONS),
-        y: -100,
-        fallSpeed: Math.random() * 0.5 + 0.5,
-        hitRim: false,
-        missed: false,
-        wentIn: false,
-        isActive: true,
-      });
-    }
-
-    return mockBalls.reduce((acc, ball) => {
-      if (!ball.isActive && ball.y > BASKET_Y + 100) {
-        return acc;
-      }
-
-      const newY = ball.y + 20;
-      const newBall = { ...ball, y: newY };
-
-      if (!ball.hitRim && checkIfBallHitRim(ball, basketX)) {
-        newBall.hitRim = true;
-      }
-
-      const ballStatus = checkIfBallWentIn(
-        newBall,
-        basketX,
-        movedSincedLastRimHit
-      );
-
-      if (ballStatus === 'wentIn') {
-        newBall.wentIn = true;
-        newBall.isActive = false;
-      } else if (ballStatus === 'missed') {
-        newBall.missed = true;
-        newBall.isActive = false;
-      }
-
-      return [...acc, newBall];
-    }, [] as Ball[]);
-  };
-
   const updateMockBasket = (mockBasket: Basket, action: number): Basket => {
     if (action === 0) {
       return {
@@ -129,7 +82,7 @@ export const useTrainingLoop = () => {
       let state = getEnvironmentState(mockBasket, mockBalls, inputSize);
       for (let j = 0; j < gameSettings.stepsPerEpisode; j++) {
         // step
-        mockBalls = updateMockBalls(
+        mockBalls = updateBalls(
           mockBalls,
           mockBasket.x,
           mockBasket.velocity !== 0
