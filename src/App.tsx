@@ -5,11 +5,9 @@ import GameSettingsForm from './components/GameSettingsForm';
 import Balls from './components/Balls';
 import Basket from './components/Basket';
 
-import { useTrainingLoop } from './hooks/use-training-loop';
 import { usePlayLoop } from './hooks/use-play-loop';
 
 function App() {
-  const { trainWithoutState } = useTrainingLoop();
   const { play } = usePlayLoop();
   const [showTrainingModal, setshowTrainingModal] = useState(false);
 

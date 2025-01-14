@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../state/hooks';
 
-import { Basket, moveLeft, moveRight } from '../state/basket-slice';
-import { Ball, resetBallState } from '../state/balls-slice';
+import { Basket } from '../state/basket-slice';
+import { Ball } from '../state/balls-slice';
 import { setIsTraining } from '../state/game-settings-slice';
 
 import { Network } from '../Network';

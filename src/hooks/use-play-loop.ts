@@ -35,7 +35,6 @@ export const usePlayLoop = () => {
   }, [balls]);
 
   const animationFrameId = useRef<number | null>(null);
-  const previousBasketX = useRef(basket.x);
 
   const update = () => {
     // Update y for all balls
@@ -44,11 +43,9 @@ export const usePlayLoop = () => {
       basketRef.current.x,
       basketRef.current.velocity !== 0
     );
-    dispatch(updateAllBalls(newBalls));
 
     const state = getEnvironmentState(basketRef.current, newBalls, inputSize);
 
-    previousBasketX.current = basket.x;
     if (modelRef.current) {
       try {
         const action = modelRef.current.chooseAction(state, 0);
@@ -58,6 +55,7 @@ export const usePlayLoop = () => {
         return;
       }
     }
+    dispatch(updateAllBalls(newBalls));
 
     animationFrameId.current = requestAnimationFrame(update);
   };
