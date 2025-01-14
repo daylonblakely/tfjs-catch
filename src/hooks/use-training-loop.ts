@@ -2,19 +2,14 @@ import { useEffect, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../state/hooks';
 
 import { Basket, moveLeft, moveRight } from '../state/basket-slice';
-import { Ball, resetBallState, updateAllBallY } from '../state/balls-slice';
+import { Ball, resetBallState } from '../state/balls-slice';
 import { setIsTraining } from '../state/game-settings-slice';
 
 import { Network } from '../Network';
 import { getEnvironmentState } from '../utils/getEnvironmentState';
 import { calculateReward } from '../utils/calculateReward';
-import {
-  checkIfBallHitRim,
-  checkIfBallWentIn,
-  createBall,
-  updateBalls,
-} from '../utils/ballUtils';
-import { BASKET_Y, HORIZONTAL_SECTIONS, MAX_BALLS } from '../constants';
+import { updateBalls } from '../utils/ballUtils';
+import { HORIZONTAL_SECTIONS } from '../constants';
 
 export const useTrainingLoop = () => {
   const balls = useAppSelector((state) => state.balls.balls);

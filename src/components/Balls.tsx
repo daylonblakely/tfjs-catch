@@ -7,8 +7,8 @@ const Balls = () => {
 
   return (
     <div>
-      {Object.keys(balls).map((id) => {
-        return <Ball key={id} ball={balls[id]} />;
+      {balls.map((ball, i) => {
+        return <Ball key={ball.id} ball={ball} />;
       })}
     </div>
   );

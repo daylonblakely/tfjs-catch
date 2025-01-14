@@ -1,6 +1,8 @@
 import { Ball } from '../state/balls-slice';
 import { BASKET_Y, HORIZONTAL_SECTIONS, MAX_BALLS } from '../constants';
 
+const BALL_SPACING = 100;
+
 export const checkIfBallHitRim = (ball: Ball, basketX: number): boolean => {
   if (ball.hitRim) return true;
   if (ball.missed) return false;
@@ -52,8 +54,16 @@ export const updateBalls = (
   movedSincedLastRimHit: boolean
 ): Ball[] => {
   const lastAddedBall = balls[balls.length - 1];
-  if (!balls.length || (lastAddedBall.y > 100 && balls.length < MAX_BALLS)) {
-    balls.push(createBall(balls.length.toString()));
+  if (
+    !balls.length ||
+    (lastAddedBall.y > BALL_SPACING && balls.length < MAX_BALLS)
+  ) {
+    const nextId =
+      balls.reduce(
+        (max, ball) => (parseInt(ball.id) > max ? parseInt(ball.id) : max),
+        0
+      ) + 1;
+    balls.push(createBall(nextId + ''));
   }
 
   return balls.reduce((acc, ball) => {
@@ -61,7 +71,7 @@ export const updateBalls = (
       return acc;
     }
 
-    const newY = ball.y + 20;
+    const newY = ball.y + 2;
     const newBall = { ...ball, y: newY };
 
     if (!ball.hitRim && checkIfBallHitRim(ball, basketX)) {
