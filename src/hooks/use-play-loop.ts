@@ -21,7 +21,7 @@ export const usePlayLoop = () => {
     [dispatch]
   );
 
-  const inputSize = 2 + gameSettings.maxBalls * 2;
+  const inputSize = 2 + gameSettings.maxBalls * 3;
 
   const basketRef = useRef(basket);
   const ballsRef = useRef(balls);

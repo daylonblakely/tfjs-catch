@@ -29,7 +29,7 @@ export const useTrainingLoop = () => {
     ballsRef.current = balls;
   }, [balls]);
 
-  const inputSize = 2 + gameSettings.maxBalls * 2;
+  const inputSize = 2 + gameSettings.maxBalls * 3;
 
   if (!modelRef.current) {
     modelRef.current = new Network({
@@ -80,20 +80,26 @@ export const useTrainingLoop = () => {
         mockBalls = updateBalls(
           mockBalls,
           mockBasket.x,
-          mockBasket.velocity !== 0
+          mockBasket.velocity !== 0,
+          20
         );
         // choose action
         const action = modelRef.current!.chooseAction(state, eps);
         // update basket
         mockBasket = updateMockBasket(mockBasket, action);
         // get reward
-        const reward = calculateReward(mockBalls, mockBasket);
+        // const reward = calculateReward(mockBalls, mockBasket);
+
+        // Sparse reward: Only give a reward if the basket catches a ball
+        const reward = mockBalls.some((ball) => ball.wentIn && ball.isActive)
+          ? 1
+          : 0;
         // get next state
         const nextState = getEnvironmentState(mockBasket, mockBalls, inputSize);
         // remember
         modelRef.current?.remember(state, action, reward, nextState);
         // update state
-        state = nextState;
+        state = [...nextState];
         // update epsilon
         eps = Math.max(
           gameSettings.minEpsilon,

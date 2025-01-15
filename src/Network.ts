@@ -58,7 +58,7 @@ export class Network {
 
   // epsilon-greedy policy
   // With probability `eps` we act randomly, otherwise we act greedily.
-  chooseAction(state: tf.Tensor, eps: number): number {
+  chooseAction(state: number[], eps: number): number {
     // explore
     if (Math.random() < eps) {
       return Math.floor(Math.random() * this.numActions);
@@ -68,7 +68,8 @@ export class Network {
         // console.log(this.predict(state));
         // return this.predict(state).argMax(1).dataSync()[0];
         // // get raw output values
-        const logits = this.model.predict(state) as tf.Tensor;
+        const stateTensor = tf.tensor2d([state]);
+        const logits = this.model.predict(stateTensor) as tf.Tensor;
         // console.log(state.dataSync());
         // console.log(logits.dataSync());
         return logits.argMax(1).dataSync()[0];
@@ -92,12 +93,17 @@ export class Network {
 
   // add sample to memory
   remember(
-    state: tf.Tensor,
+    state: number[],
     action: number,
     reward: number,
-    nextState: tf.Tensor
+    nextState: number[]
   ) {
-    this.memory.addSample([state, action, reward, nextState]);
+    this.memory.addSample([
+      tf.tensor2d([state]),
+      action,
+      reward,
+      tf.tensor2d([nextState]),
+    ]);
   }
 
   predict(state: tf.Tensor): tf.Tensor {
@@ -109,64 +115,68 @@ export class Network {
 
   // learn from memory
   async train() {
-    // Sample from memory
     const batch = this.memory.sample(this.batchSize);
-    const [states, nextStates] = batch.reduce(
-      ([states, nextStates], [state, , , nextState]) => {
-        states.push(state);
-        nextStates.push(
-          nextState ? nextState : tf.zeros([this.model.inputSize])
-        );
-        return [states, nextStates];
-      },
-      [[], []] as [tf.Tensor[], tf.Tensor[]]
-    );
 
-    // Predict the values of each action at each state
-    const [qsa, qsad] = states.reduce(
-      ([qsa, qsad], state, i) => {
-        qsa.push(this.predict(state));
-        qsad.push(this.predict(nextStates[i]));
+    const [x, y] = tf.tidy(() => {
+      // Extract states and nextStates
+      const [states, nextStates] = batch.reduce(
+        ([states, nextStates], [state, , , nextState]) => {
+          states.push(state);
+          nextStates.push(
+            nextState ? nextState : tf.zeros([this.model.inputSize])
+          );
+          return [states, nextStates];
+        },
+        [[], []] as [tf.Tensor[], tf.Tensor[]]
+      );
 
-        return [qsa, qsad];
-      },
-      [[], []] as [tf.Tensor[], tf.Tensor[]]
-    );
+      // Predict Q-values
+      const [qsa, qsad] = states.reduce(
+        ([qsa, qsad], state, i) => {
+          qsa.push(this.predict(state));
+          qsad.push(this.predict(nextStates[i]));
+          return [qsa, qsad];
+        },
+        [[], []] as [tf.Tensor[], tf.Tensor[]]
+      );
 
-    const x: number[][] = [];
-    const y: number[][] = [];
+      const x: number[][] = [];
+      const y: number[][] = [];
 
-    // Update the states rewards with the discounted next states rewards
-    batch.forEach(([state, action, reward, nextState], index) => {
-      const currentQ = qsa[index].clone();
-      const targetQ = currentQ.dataSync();
+      // Update rewards and prepare training data
+      batch.forEach(([state, action, reward, nextState], index) => {
+        const currentQ = qsa[index].dataSync(); // No need to dispose here as it's wrapped in tidy
+        const targetQ = [...currentQ]; // Copy current Q-values to modify
 
-      if (nextState) {
-        const maxNextQ = qsad[index].max().dataSync()[0];
-        targetQ[action] =
-          targetQ[action] +
-          this.learningRate *
-            (reward + this.discountRate * maxNextQ - targetQ[action]);
-      } else {
-        targetQ[action] = reward;
-      }
+        if (nextState) {
+          const maxNextQ = qsad[index].max().dataSync()[0];
+          targetQ[action] =
+            targetQ[action] +
+            this.learningRate *
+              (reward + this.discountRate * maxNextQ - targetQ[action]);
+        } else {
+          targetQ[action] = reward;
+        }
 
-      x.push(Array.from(state.dataSync()));
-      y.push(Array.from(targetQ));
-      currentQ.dispose();
+        x.push(Array.from(state.dataSync()));
+        y.push(Array.from(targetQ));
+      });
+
+      // Dispose tensors from predictions
+      qsa.forEach((tensor) => tensor.dispose());
+      qsad.forEach((tensor) => tensor.dispose());
+
+      return [x, y];
     });
 
-    // Clean unused tensors
-    qsa.forEach((tensor) => tensor.dispose());
-    qsad.forEach((tensor) => tensor.dispose());
-
-    // Reshape the batches to be fed to the network
+    // Convert x and y into tensors
     const xBatch = tf.tensor2d(x, [x.length, this.model.inputSize]);
     const yBatch = tf.tensor2d(y, [y.length, this.numActions]);
 
-    // Learn the Q(s, a) values given associated discounted rewards
+    // Train the model
     await this.model.fit(xBatch, yBatch, { batchSize: this.batchSize });
 
+    // Dispose batches after training
     xBatch.dispose();
     yBatch.dispose();
   }

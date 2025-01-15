@@ -1,4 +1,3 @@
-import * as tf from '@tensorflow/tfjs';
 import { Ball } from '../state/balls-slice';
 import { Basket } from '../state/basket-slice';
 import { HORIZONTAL_SECTIONS } from '../constants';
@@ -7,7 +6,7 @@ export const getEnvironmentState = (
   basket: Basket,
   balls: Ball[],
   inputSize: number
-): tf.Tensor2D => {
+): number[] => {
   const state = new Array(inputSize).fill(0);
 
   // Set basket position
@@ -24,7 +23,9 @@ export const getEnvironmentState = (
       state[positionOffset] = ball.x / HORIZONTAL_SECTIONS;
       // Set y position (normalized)
       state[positionOffset + 1] = ball.y / window.innerHeight;
+      // set fall speed (normalized)
+      state[positionOffset + 2] = ball.fallSpeed / 2;
     });
 
-  return tf.tensor2d([state]);
+  return state;
 };

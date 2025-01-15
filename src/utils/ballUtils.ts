@@ -51,7 +51,8 @@ export const createBall = (id: string): Ball => {
 export const updateBalls = (
   balls: Ball[],
   basketX: number,
-  movedSincedLastRimHit: boolean
+  movedSincedLastRimHit: boolean,
+  yDistance: number = 2
 ): Ball[] => {
   const lastAddedBall = balls[balls.length - 1];
   if (
@@ -71,8 +72,13 @@ export const updateBalls = (
       return acc;
     }
 
-    const newY = ball.y + 2;
+    const newY = ball.y + yDistance * ball.fallSpeed;
     const newBall = { ...ball, y: newY };
+
+    // set to inactive on next tick after make/miss
+    if (ball.wentIn || ball.missed) {
+      newBall.isActive = false;
+    }
 
     if (!ball.hitRim && checkIfBallHitRim(ball, basketX)) {
       newBall.hitRim = true;
@@ -86,10 +92,8 @@ export const updateBalls = (
 
     if (ballStatus === 'wentIn') {
       newBall.wentIn = true;
-      newBall.isActive = false;
     } else if (ballStatus === 'missed') {
       newBall.missed = true;
-      newBall.isActive = false;
     }
 
     return [...acc, newBall];

@@ -10,7 +10,7 @@ const initialState = {
   discountRate: 0.95,
   learningRate: 0.001,
   memoryLength: 10000,
-  numEpisodes: 3000,
+  numEpisodes: 5000,
   stepsPerEpisode: 500,
   hiddenLayerSizes: [128, 128, 128],
   isTraining: false,
