@@ -46,15 +46,17 @@ export const useTrainingLoop = () => {
   }
 
   const updateMockBasket = (mockBasket: Basket, action: number): Basket => {
+    const previousPosition = mockBasket.x;
+
     if (action === 0) {
       return {
         x: Math.max(0, mockBasket.x - 1),
-        velocity: -1,
+        velocity: previousPosition === 0 ? 0 : -1,
       };
     } else if (action === 2) {
       return {
         x: Math.min(HORIZONTAL_SECTIONS - 1, mockBasket.x + 1),
-        velocity: 1,
+        velocity: previousPosition === HORIZONTAL_SECTIONS - 1 ? 0 : 1,
       };
     } else {
       return {
@@ -66,14 +68,17 @@ export const useTrainingLoop = () => {
 
   const trainWithoutState = async () => {
     dispatch(setIsTraining(true));
+    let eps = gameSettings.epsilonStart;
+    let mockBasket: Basket = {
+      x: Math.floor(HORIZONTAL_SECTIONS / 2),
+      velocity: 0,
+    };
+
     for (let i = 0; i < gameSettings.numEpisodes; i++) {
       console.log('Starting Game: ', i);
-      let eps = gameSettings.epsilonStart;
+      let gameReward = 0;
       let mockBalls: Ball[] = [];
-      let mockBasket: Basket = {
-        x: Math.floor(HORIZONTAL_SECTIONS / 2),
-        velocity: 1,
-      };
+
       let state = getEnvironmentState(mockBasket, mockBalls, inputSize);
       for (let j = 0; j < gameSettings.stepsPerEpisode; j++) {
         // step
@@ -81,31 +86,32 @@ export const useTrainingLoop = () => {
           mockBalls,
           mockBasket.x,
           mockBasket.velocity !== 0,
-          20
+          40
         );
         // choose action
         const action = modelRef.current!.chooseAction(state, eps);
         // update basket
         mockBasket = updateMockBasket(mockBasket, action);
         // get reward
-        // const reward = calculateReward(mockBalls, mockBasket);
+        const reward = calculateReward(mockBalls, mockBasket, action);
+        gameReward += reward;
 
         // Sparse reward: Only give a reward if the basket catches a ball
-        const reward = mockBalls.some((ball) => ball.wentIn && ball.isActive)
-          ? 1
-          : 0;
+        // const reward = mockBalls.some((ball) => ball.wentIn && ball.isActive)
+        //   ? 10
+        //   : 0;
         // get next state
         const nextState = getEnvironmentState(mockBasket, mockBalls, inputSize);
         // remember
         modelRef.current?.remember(state, action, reward, nextState);
         // update state
         state = [...nextState];
-        // update epsilon
-        eps = Math.max(
-          gameSettings.minEpsilon,
-          eps * gameSettings.epsilonDecay
-        );
       }
+
+      // update epsilon
+      eps = Math.max(gameSettings.minEpsilon, eps * gameSettings.epsilonDecay);
+
+      console.log('total reward: ', gameReward);
 
       await modelRef.current?.train();
     }

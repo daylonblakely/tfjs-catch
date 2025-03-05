@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../state/hooks';
 
-import { moveLeft, moveRight } from '../state/basket-slice';
+import { moveLeft, moveRight, stay } from '../state/basket-slice';
 import { updateAllBalls } from '../state/balls-slice';
 
 import { Network } from '../Network';
@@ -17,7 +17,11 @@ export const usePlayLoop = () => {
   const modelRef = useRef<Network | null>(null);
 
   const actions = useMemo(
-    () => [() => dispatch(moveLeft()), () => {}, () => dispatch(moveRight())],
+    () => [
+      () => dispatch(moveLeft()),
+      () => dispatch(stay()),
+      () => dispatch(moveRight()),
+    ],
     [dispatch]
   );
 
@@ -37,11 +41,14 @@ export const usePlayLoop = () => {
   const animationFrameId = useRef<number | null>(null);
 
   const update = () => {
+    count.current++;
+    console.log(count.current);
     // Update y for all balls
     const newBalls = updateBalls(
       [...ballsRef.current],
       basketRef.current.x,
-      basketRef.current.velocity !== 0
+      basketRef.current.velocity !== 0,
+      10
     );
 
     const state = getEnvironmentState(basketRef.current, newBalls, inputSize);
@@ -60,6 +67,7 @@ export const usePlayLoop = () => {
     animationFrameId.current = requestAnimationFrame(update);
   };
 
+  const count = useRef(0);
   const play = async () => {
     const loadedModel = await Network.loadModel(inputSize, actions.length);
     modelRef.current = loadedModel;

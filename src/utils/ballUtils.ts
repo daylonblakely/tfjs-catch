@@ -25,6 +25,9 @@ export const checkIfBallWentIn = (
 
   if (!throughRim) return 'falling';
 
+  // console.log('through rim ', throughRim);
+  // console.log(movedSinceLastRimHit);
+
   if (ball.hitRim && ball.x === basketX && !movedSinceLastRimHit) {
     return 'wentIn';
   } else {
@@ -34,7 +37,8 @@ export const checkIfBallWentIn = (
 
 export const createBall = (id: string): Ball => {
   const x = Math.floor(Math.random() * (HORIZONTAL_SECTIONS - 1));
-  const fallSpeed = Math.ceil(Math.random() * 2);
+  // random number between .4 and 1
+  const fallSpeed = Math.random() * (1 - 0.4) + 0.4;
 
   return {
     id,

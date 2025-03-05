@@ -24,7 +24,7 @@ export const getEnvironmentState = (
       // Set y position (normalized)
       state[positionOffset + 1] = ball.y / window.innerHeight;
       // set fall speed (normalized)
-      state[positionOffset + 2] = ball.fallSpeed / 2;
+      state[positionOffset + 2] = ball.fallSpeed;
     });
 
   return state;
