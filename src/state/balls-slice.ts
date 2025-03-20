@@ -27,8 +27,12 @@ const ballsSlice = createSlice({
       state.balls = [];
       state.ballsMadeCount = 0;
     },
-    updateAllBalls: (state, action: PayloadAction<Ball[]>) => {
-      state.balls = action.payload;
+    updateAllBalls: (
+      state,
+      action: PayloadAction<{ balls: Ball[]; ballsMadeCount: number }>
+    ) => {
+      state.balls = action.payload.balls;
+      state.ballsMadeCount = action.payload.ballsMadeCount;
     },
   },
 });

@@ -10,6 +10,7 @@ import { updateBalls } from '../utils/ballUtils';
 
 export const usePlayLoop = () => {
   const balls = useAppSelector((state) => state.balls.balls);
+  const ballsMadeCount = useAppSelector((state) => state.balls.ballsMadeCount);
   const basket = useAppSelector((state) => state.basket);
   const gameSettings = useAppSelector((state) => state.gameSettings);
   const dispatch = useAppDispatch();
@@ -29,6 +30,7 @@ export const usePlayLoop = () => {
 
   const basketRef = useRef(basket);
   const ballsRef = useRef(balls);
+  const ballsMadeCountRef = useRef(ballsMadeCount);
 
   useEffect(() => {
     basketRef.current = basket;
@@ -38,20 +40,27 @@ export const usePlayLoop = () => {
     ballsRef.current = balls;
   }, [balls]);
 
+  useEffect(() => {
+    ballsMadeCountRef.current = ballsMadeCount;
+  }, [ballsMadeCount]);
+
   const animationFrameId = useRef<number | null>(null);
 
   const update = () => {
-    count.current++;
-    console.log(count.current);
     // Update y for all balls
-    const newBalls = updateBalls(
+    const { updatedBalls, ballsMadeCount: ballsMade } = updateBalls(
       [...ballsRef.current],
       basketRef.current.x,
       basketRef.current.velocity !== 0,
-      10
+      10,
+      ballsMadeCountRef.current
     );
 
-    const state = getEnvironmentState(basketRef.current, newBalls, inputSize);
+    const state = getEnvironmentState(
+      basketRef.current,
+      updatedBalls,
+      inputSize
+    );
 
     if (modelRef.current) {
       try {
@@ -62,12 +71,13 @@ export const usePlayLoop = () => {
         return;
       }
     }
-    dispatch(updateAllBalls(newBalls));
+    dispatch(
+      updateAllBalls({ balls: updatedBalls, ballsMadeCount: ballsMade })
+    );
 
     animationFrameId.current = requestAnimationFrame(update);
   };
 
-  const count = useRef(0);
   const play = async () => {
     const loadedModel = await Network.loadModel(inputSize, actions.length);
     modelRef.current = loadedModel;

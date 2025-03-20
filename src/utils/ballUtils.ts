@@ -25,9 +25,6 @@ export const checkIfBallWentIn = (
 
   if (!throughRim) return 'falling';
 
-  // console.log('through rim ', throughRim);
-  // console.log(movedSinceLastRimHit);
-
   if (ball.hitRim && ball.x === basketX && !movedSinceLastRimHit) {
     return 'wentIn';
   } else {
@@ -56,8 +53,9 @@ export const updateBalls = (
   balls: Ball[],
   basketX: number,
   movedSincedLastRimHit: boolean,
-  yDistance: number = 2
-): Ball[] => {
+  yDistance: number = 2,
+  ballsMadeCount: number
+) => {
   const lastAddedBall = balls[balls.length - 1];
   if (
     !balls.length ||
@@ -71,7 +69,7 @@ export const updateBalls = (
     balls.push(createBall(nextId + ''));
   }
 
-  return balls.reduce((acc, ball) => {
+  const updatedBalls: Ball[] = balls.reduce((acc, ball) => {
     if (!ball.isActive && ball.y > BASKET_Y + 100) {
       return acc;
     }
@@ -79,9 +77,16 @@ export const updateBalls = (
     const newY = ball.y + yDistance * ball.fallSpeed;
     const newBall = { ...ball, y: newY };
 
+    // if ball is still not below rim, but has already been tracked as make or miss
+    if (!newBall.isActive) return [...acc, newBall];
+
     // set to inactive on next tick after make/miss
     if (ball.wentIn || ball.missed) {
       newBall.isActive = false;
+
+      if (newBall.wentIn) {
+        ballsMadeCount++;
+      }
     }
 
     if (!ball.hitRim && checkIfBallHitRim(ball, basketX)) {
@@ -102,4 +107,6 @@ export const updateBalls = (
 
     return [...acc, newBall];
   }, [] as Ball[]);
+
+  return { updatedBalls, ballsMadeCount };
 };

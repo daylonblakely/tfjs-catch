@@ -11,6 +11,8 @@ import { calculateReward } from '../utils/calculateReward';
 import { updateBalls } from '../utils/ballUtils';
 import { HORIZONTAL_SECTIONS } from '../constants';
 
+const BALL_FALL_DISTANCE = 40;
+
 export const useTrainingLoop = () => {
   const balls = useAppSelector((state) => state.balls.balls);
   const basket = useAppSelector((state) => state.basket);
@@ -82,24 +84,29 @@ export const useTrainingLoop = () => {
       let state = getEnvironmentState(mockBasket, mockBalls, inputSize);
       for (let j = 0; j < gameSettings.stepsPerEpisode; j++) {
         // step
-        mockBalls = updateBalls(
+        const { updatedBalls } = updateBalls(
           mockBalls,
           mockBasket.x,
           mockBasket.velocity !== 0,
-          40
+          BALL_FALL_DISTANCE,
+          0
         );
+
+        mockBalls = updatedBalls;
+
         // choose action
         const action = modelRef.current!.chooseAction(state, eps);
         // update basket
         mockBasket = updateMockBasket(mockBasket, action);
         // get reward
-        const reward = calculateReward(mockBalls, mockBasket, action);
+        const reward = calculateReward(
+          mockBalls,
+          mockBasket,
+          action,
+          BALL_FALL_DISTANCE
+        );
         gameReward += reward;
 
-        // Sparse reward: Only give a reward if the basket catches a ball
-        // const reward = mockBalls.some((ball) => ball.wentIn && ball.isActive)
-        //   ? 10
-        //   : 0;
         // get next state
         const nextState = getEnvironmentState(mockBasket, mockBalls, inputSize);
         // remember
