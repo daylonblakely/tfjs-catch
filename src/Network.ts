@@ -65,28 +65,11 @@ export class Network {
     } else {
       // exploit
       return tf.tidy(() => {
-        // console.log(this.predict(state));
-        // return this.predict(state).argMax(1).dataSync()[0];
         // // get raw output values
         const stateTensor = tf.tensor2d([state]);
         const logits = this.model.predict(stateTensor) as tf.Tensor;
-        // console.log(state.dataSync());
-        // console.log(logits.dataSync());
-        return logits.argMax(1).dataSync()[0];
-        // turn into probability distribution 0-1
-        const sigmoid = tf.sigmoid(logits);
-        // normalize to sum to 1
-        const probs = tf.div(sigmoid, tf.sum(sigmoid)) as tf.Tensor1D;
-        console.log(probs.dataSync());
-        // randomly sample from dist
-        console.log(tf.multinomial(probs, 1).dataSync());
-        const action = tf.multinomial(probs, 1).dataSync()[0];
-        // // clean up tensors
-        // logits.dispose();
-        // sigmoid.dispose();
-        // probs.dispose();
 
-        return action;
+        return logits.argMax(1).dataSync()[0];
       });
     }
   }
